@@ -27,6 +27,9 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseStaticFiles();
+app.MapFallbackToFile("index.html");
+
 var api = app.MapGroup("/api").AddFluentValidationAutoValidation();
 
 var auth = api.MapGroup("auth");
