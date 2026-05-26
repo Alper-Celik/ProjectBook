@@ -1,13 +1,16 @@
+using Api.Auth.Models;
+
 using Microsoft.EntityFrameworkCore;
 
 using Npgsql;
-
-using EFCore.NamingConventions;
 
 namespace Api.Database;
 
 class PGContext : DbContext
 {
+
+    public DbSet<User> Users { get; set; }
+
     protected PGContext()
     {
     }
