@@ -2,6 +2,8 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
+import VueRouter from 'vue-router/vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 const proxyTarget = process.env.ASPNETCORE_HTTP_PORT
@@ -12,7 +14,7 @@ const proxyTarget = process.env.ASPNETCORE_HTTP_PORT
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), vueDevTools()],
+  plugins: [tailwindcss(), VueRouter(), vue(), vueDevTools()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
