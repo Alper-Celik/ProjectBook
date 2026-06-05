@@ -38,6 +38,13 @@ declare module 'vue-router/auto-routes' {
       { default: ParamValue<false> },
       | never
     >,
+    '/register': RouteRecordInfo<
+      '/register',
+      '/register',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
   }
 
   /**
@@ -54,6 +61,12 @@ declare module 'vue-router/auto-routes' {
     'src/pages/[...default].vue': {
       routes:
         | '/[...default]'
+      views:
+        | never
+    }
+    'src/pages/register.vue': {
+      routes:
+        | '/register'
       views:
         | never
     }

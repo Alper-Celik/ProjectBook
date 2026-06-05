@@ -16,20 +16,27 @@ using Npgsql;
 
 namespace Api.Auth.Endpoints;
 
-public static class Register
+public static class RegisterEndpoints
 {
 
     // see https://www.rfc-editor.org/rfc/rfc9106.html#name-recommendations
     const int ARGON2ID_ITER = 3;
     const int ARGON2ID_MEM_BYTES = 64 * 1024 * 1024;
 
+    const string UserHandleAcceptedRegex = @"^[a-zA-Z0-9_\-]{3,30}$";
 
     public static void Map(IEndpointRouteBuilder route)
     {
-        route.MapPost("register", Handle);
+        route.MapPost("register", PostRegister);
+        route.MapGet("register_info", GetRegisterInfo);
     }
 
-    private static async Task<Results<Ok<Guid>, Conflict>> Handle(
+    private static async Task<bool> CanAdminRegister()
+    {
+        return true;
+    }
+
+    private static async Task<Results<Ok<Guid>, Conflict>> PostRegister(
             [FromServices] PGContext db,
             [FromBody] RegisterDTO dto
             )
@@ -42,6 +49,7 @@ public static class Register
         var user = new User()
         {
             Id = Guid.CreateVersion7(),
+            UserHandle = dto.UserHandle,
             Email = dto.Email,
             PasswordHash = hash,
         };
@@ -62,18 +70,34 @@ public static class Register
 
     }
 
+    private static async Task<Ok<RegisterInfo>> GetRegisterInfo() => TypedResults.Ok(new RegisterInfo(
+         CanRegisterAsAdmin: await CanAdminRegister(),
+         UserHandleAcceptedRegex: UserHandleAcceptedRegex
+        ));
 
-    private record RegisterDTO
+
+    public record RegisterInfo(bool CanRegisterAsAdmin, string UserHandleAcceptedRegex);
+
+    public record RegisterDTO
     {
-        public required string Email { get; set; }
+        public required string UserHandle { get; set; }
+        public string? Email { get; set; }
         public required string Password { get; set; }
+        public required bool AdminRegistration { get; set; }
     }
 
     private class RegisterDTOValidator : AbstractValidator<RegisterDTO>
     {
-        public RegisterDTOValidator()
+        public RegisterDTOValidator(PGContext ctx)
         {
             RuleFor(r => r.Email).Must(e => new EmailAddressAttribute().IsValid(e)).WithMessage("Email is invalid");
+            RuleFor(r => r.Email).MustAsync(async (e, ct) => !await ctx.Users.Where(u => u.Email == e).AnyAsync(ct)).WithMessage("Email is already used");
+
+            RuleFor(r => r.UserHandle).Matches(UserHandleAcceptedRegex).WithMessage("UserHandle format is invalid");
+            RuleFor(r => r.UserHandle).MustAsync(async (uh, ct) => !await ctx.Users.Where(u => u.UserHandle == uh).AnyAsync(ct)).WithMessage("User with same handle already exists");
+
+            RuleFor(r => r.AdminRegistration).MustAsync(async (adr, ct) => !adr || await CanAdminRegister()).WithMessage("Can't Register As Admin");
+
         }
     }
 }

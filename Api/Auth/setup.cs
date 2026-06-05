@@ -4,6 +4,6 @@ public static class Setup
 {
     public static void MapEndpoints(IEndpointRouteBuilder route)
     {
-        Endpoints.Register.Map(route);
+        Endpoints.RegisterEndpoints.Map(route);
     }
 }
