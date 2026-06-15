@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed } from 'vue'
+import { useQuery, useMutation } from '@pinia/colada'
+import { getApiAuthRegisterInfo, postApiAuthRegister } from '@/api'
+import type { RegisterDto } from '@/api'
 
 // Form state
 const userHandle = ref('')
@@ -9,23 +12,48 @@ const confirmPassword = ref('')
 const isAdmin = ref(false)
 
 // UI state
-const isAdminAvailable = ref(false)
-const loading = ref(false)
-const error = ref('')
-const success = ref('')
+const pageError = ref('')
+const pageSuccess = ref('')
 
-// Check if admin registration is available (empty function for now)
-const checkAdminRegistrationAvailable = async (): Promise<boolean> => {
-  // TODO: Implement backend check
-  // Example: return await fetch('/api/auth/setup-status').then(r => r.json())
-  return false
+// Fetch register info (admin availability + regex)
+const { data: registerInfo } = useQuery({
+  key: ['register-info'],
+  query: async () => {
+    const { data, error } = await getApiAuthRegisterInfo()
+    if (error) throw error
+    return data
+  },
+})
+
+const isAdminAvailable = computed(() => registerInfo.value?.canRegisterAsAdmin ?? false)
+const userHandleRegex = computed(() => registerInfo.value?.userHandleAcceptedRegex ?? '')
+
+// Registration mutation
+const { mutateAsync: register, isLoading } = useMutation({
+  mutation: async (body: RegisterDto) => {
+    const { data, error } = await postApiAuthRegister({ body })
+    if (error) throw error
+    return data
+  },
+})
+
+const showError = (message: string): void => {
+  pageError.value = message
+  pageSuccess.value = ''
 }
 
-// Validate form fields (empty function for now)
+const showSuccess = (message: string): void => {
+  pageSuccess.value = message
+  pageError.value = ''
+}
+
 const validateForm = (): boolean => {
-  // TODO: Implement proper validation
   if (!userHandle.value.trim()) {
     showError('User handle is required')
+    return false
+  }
+  if (userHandleRegex.value && !new RegExp(userHandleRegex.value).test(userHandle.value)) {
+    showError('User handle format is invalid')
     return false
   }
   if (!password.value) {
@@ -39,74 +67,38 @@ const validateForm = (): boolean => {
   return true
 }
 
-// Show error message (empty function for now)
-const showError = (message: string): void => {
-  error.value = message
-  success.value = ''
-  // TODO: Implement toast or persistent error display
-}
-
-// Show success message (empty function for now)
-const showSuccess = (message: string): void => {
-  success.value = message
-  error.value = ''
-  // TODO: Implement toast or persistent success display
-}
-
-// Handle form submission (empty function for now)
 const handleRegister = async (): Promise<void> => {
-  // TODO: Implement registration logic
-  loading.value = true
-  error.value = ''
-  success.value = ''
+  pageError.value = ''
+  pageSuccess.value = ''
+
+  if (!validateForm()) {
+    return
+  }
 
   try {
-    if (!validateForm()) {
-      loading.value = false
-      return
-    }
-
-    const payload = {
+    await register({
       userHandle: userHandle.value,
       email: email.value || null,
       password: password.value,
-      isAdmin: isAdmin.value
+      adminRegistration: isAdmin.value,
+    })
+
+    showSuccess('Registration successful!')
+
+    // Reset form
+    userHandle.value = ''
+    email.value = ''
+    password.value = ''
+    confirmPassword.value = ''
+    isAdmin.value = false
+  } catch (err: any) {
+    if (err?.status === 409) {
+      showError('User handle or email already exists')
+    } else {
+      showError(err?.message ?? 'Registration failed. Please try again.')
     }
-
-    // Example API call:
-    // const response = await fetch('/api/auth/register', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(payload)
-    // })
-    //
-    // if (response.status === 409) {
-    //   showError('User handle or email already exists')
-    //   return
-    // }
-    //
-    // if (!response.ok) {
-    //   showError('Registration failed. Please try again.')
-    //   return
-    // }
-    //
-    // const userId = await response.json()
-    // showSuccess('Registration successful!')
-
-    console.log('Register payload:', payload)
-    showSuccess('Registration successful! (Mock)')
-  } catch (err) {
-    showError('An unexpected error occurred.')
-    console.error('Registration error:', err)
-  } finally {
-    loading.value = false
   }
 }
-
-// Check admin availability on mount
-onMounted(async () => {
-  isAdminAvailable.value = await checkAdminRegistrationAvailable()
-})
 </script>
 
 <template>
@@ -118,13 +110,13 @@ onMounted(async () => {
         </h2>
 
         <!-- Error Alert -->
-        <div v-if="error" class="alert alert-error mb-4">
-          <span>{{ error }}</span>
+        <div v-if="pageError" class="alert alert-error mb-4">
+          <span>{{ pageError }}</span>
         </div>
 
         <!-- Success Alert -->
-        <div v-if="success" class="alert alert-success mb-4">
-          <span>{{ success }}</span>
+        <div v-if="pageSuccess" class="alert alert-success mb-4">
+          <span>{{ pageSuccess }}</span>
         </div>
 
         <form @submit.prevent="handleRegister" class="space-y-4">
@@ -204,10 +196,10 @@ onMounted(async () => {
             <button
               type="submit"
               class="btn btn-primary w-full"
-              :disabled="loading"
+              :disabled="isLoading"
             >
-              <span v-if="loading" class="loading loading-spinner"></span>
-              {{ loading ? 'Registering...' : 'Register' }}
+              <span v-if="isLoading" class="loading loading-spinner"></span>
+              {{ isLoading ? 'Registering...' : 'Register' }}
             </button>
           </div>
         </form>

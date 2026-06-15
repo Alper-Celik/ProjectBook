@@ -1,5 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
 
+import { heyApiPlugin } from '@hey-api/vite-plugin'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
@@ -14,7 +15,23 @@ const proxyTarget = process.env.ASPNETCORE_HTTP_PORT
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [tailwindcss(), VueRouter(), vue(), vueDevTools()],
+  plugins: [
+    tailwindcss(),
+    VueRouter(),
+    vue(),
+    vueDevTools(),
+    heyApiPlugin({
+      config: {
+        input: '../Api/Api.json',
+        output: 'src/api',
+        plugins: [
+          '@hey-api/sdk',
+          '@hey-api/typescript',
+          '@hey-api/client-fetch',
+        ],
+      },
+    }),
+  ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
