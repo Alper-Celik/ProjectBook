@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --clearScreen false",
+    "dev-all": "vite --clearScreen false & dotnet watch --project ../Api/",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",

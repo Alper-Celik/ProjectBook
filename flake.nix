@@ -25,12 +25,19 @@
           ...
         }:
         {
-          devShells.default = pkgs.mkShell {
-            packages = with pkgs; [
-              dotnet-sdk_10
-              nodejs_22
-            ];
-          };
+          devShells.default =
+            let
+              dotnet = pkgs.dotnetCorePackages.sdk_10_0;
+            in
+            pkgs.mkShell {
+              packages = with pkgs; [
+                dotnet
+                nodejs_22
+              ];
+
+              DOTNET_ROOT = "${dotnet}/share/dotnet";
+              DOTNET_PATH = "${dotnet}/bin/dotnet";
+            };
         };
     };
 }
