@@ -2,15 +2,11 @@ using Api.Database;
 
 using FluentValidation;
 
-using Npgsql;
-
 using Scalar.AspNetCore;
 
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 builder.Services.AddValidatorsFromAssemblyContaining<PGContext>();

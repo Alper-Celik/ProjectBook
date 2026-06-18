@@ -20,7 +20,9 @@ class PGContext : DbContext
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSnakeCaseNamingConvention();
+        => optionsBuilder
+        .UseSnakeCaseNamingConvention()
+        .UseValidationCheckConstraints();
 
     public static void ConfigureDB(IServiceCollection services, string connectionString)
     {

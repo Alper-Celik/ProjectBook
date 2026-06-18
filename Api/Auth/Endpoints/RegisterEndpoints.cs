@@ -23,8 +23,6 @@ public static class RegisterEndpoints
     const int ARGON2ID_ITER = 3;
     const int ARGON2ID_MEM_BYTES = 64 * 1024 * 1024;
 
-    const string UserHandleAcceptedRegex = @"^[a-zA-Z0-9_\-]{3,30}$";
-
     public static void Map(IEndpointRouteBuilder route)
     {
         route.MapPost("register", PostRegister);
@@ -48,7 +46,6 @@ public static class RegisterEndpoints
 
         var user = new User()
         {
-            Id = Guid.CreateVersion7(),
             UserHandle = dto.UserHandle,
             Email = dto.Email,
             PasswordHash = hash,
@@ -72,7 +69,7 @@ public static class RegisterEndpoints
 
     private static async Task<Ok<RegisterInfo>> GetRegisterInfo() => TypedResults.Ok(new RegisterInfo(
          CanRegisterAsAdmin: await CanAdminRegister(),
-         UserHandleAcceptedRegex: UserHandleAcceptedRegex
+         UserHandleAcceptedRegex: User.UserHandleAcceptedRegex
         ));
 
 
@@ -93,7 +90,7 @@ public static class RegisterEndpoints
             RuleFor(r => r.Email).Must(e => new EmailAddressAttribute().IsValid(e)).WithMessage("Email is invalid");
             RuleFor(r => r.Email).MustAsync(async (e, ct) => !await ctx.Users.Where(u => u.Email == e).AnyAsync(ct)).WithMessage("Email is already used");
 
-            RuleFor(r => r.UserHandle).Matches(UserHandleAcceptedRegex).WithMessage("UserHandle format is invalid");
+            RuleFor(r => r.UserHandle).Matches(User.UserHandleAcceptedRegex).WithMessage("UserHandle format is invalid");
             RuleFor(r => r.UserHandle).MustAsync(async (uh, ct) => !await ctx.Users.Where(u => u.UserHandle == uh).AnyAsync(ct)).WithMessage("User with same handle already exists");
 
             RuleFor(r => r.AdminRegistration).MustAsync(async (adr, ct) => !adr || await CanAdminRegister()).WithMessage("Can't Register As Admin");
