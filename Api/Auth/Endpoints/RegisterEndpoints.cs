@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 using Api.Auth.Models;
+using Api.Auth.Utils;
 using Api.Database;
 
 using FluentValidation;
@@ -34,8 +35,12 @@ public static class RegisterEndpoints
         return true;
     }
 
-    private static async Task<Results<Ok<Guid>, Conflict>> PostRegister(
+    private static async Task<Results<
+        Ok<string>,
+        Conflict
+        >> PostRegister(
             [FromServices] PGContext db,
+            [FromHeader(Name = "user-agent")] string userAgent,
             [FromBody] RegisterDTO dto
             )
     {
@@ -53,18 +58,16 @@ public static class RegisterEndpoints
 
         try
         {
-
             await db.Users.AddAsync(user);
+            string token = await LoginUtils.CreateUserSession(user.Id, userAgent, db);
             await db.SaveChangesAsync();
+            return TypedResults.Ok(token);
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx &&
                                             pgEx.SqlState == PostgresErrorCodes.UniqueViolation)
         {
             return TypedResults.Conflict();
         }
-
-        return TypedResults.Ok(user.Id);
-
     }
 
     private static async Task<Ok<RegisterInfo>> GetRegisterInfo() => TypedResults.Ok(new RegisterInfo(
@@ -87,8 +90,16 @@ public static class RegisterEndpoints
     {
         public RegisterDTOValidator(PGContext ctx)
         {
-            RuleFor(r => r.Email).Must(e => new EmailAddressAttribute().IsValid(e)).WithMessage("Email is invalid");
-            RuleFor(r => r.Email).MustAsync(async (e, ct) => !await ctx.Users.Where(u => u.Email == e).AnyAsync(ct)).WithMessage("Email is already used");
+            RuleFor(r => r.Email)
+                .Must(e => new EmailAddressAttribute().IsValid(e))
+                .WithMessage("Email is invalid");
+
+            RuleFor(r => r.Email)
+                .MustAsync(async (e, ct) =>
+                        !await ctx.Users
+                        .Where(u => u.Email == e)
+                        .AnyAsync(ct))
+                .WithMessage("Email is already used");
 
             RuleFor(r => r.UserHandle).Matches(User.UserHandleAcceptedRegex).WithMessage("UserHandle format is invalid");
             RuleFor(r => r.UserHandle).MustAsync(async (uh, ct) => !await ctx.Users.Where(u => u.UserHandle == uh).AnyAsync(ct)).WithMessage("User with same handle already exists");
