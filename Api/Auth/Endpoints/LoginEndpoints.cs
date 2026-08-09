@@ -24,6 +24,7 @@ public static class LoginEndpoints
         Ok<string>,
         ForbidHttpResult
     >> Login(
+            [FromServices] HttpContext ctx,
             [FromServices] PGContext db,
             [FromHeader(Name = "user-agent")] string userAgent,
             [FromBody] LoginDTO loginDTO
@@ -59,6 +60,13 @@ public static class LoginEndpoints
             var token = await LoginUtils.CreateUserSession(userId.Value, userAgent, db);
             await db.SaveChangesAsync();
 
+            ctx.Response.Cookies.Append("token", token, new CookieOptions
+            {
+                IsEssential = true,
+                SameSite = SameSiteMode.Strict,
+                Secure = ctx.Request.Scheme == "https",
+                HttpOnly = true,
+            });
             return TypedResults.Ok(token);
         }
         return TypedResults.Forbid();
