@@ -43,16 +43,6 @@ public static class LoginEndpoints
             hash = user.PasswordHash;
         }
 
-        if (loginDTO.UserHandle is not null)
-        {
-            var user = await db.Users
-                .Where(u => u.UserHandle == loginDTO.UserHandle)
-                .Select(u => new { u.Id, u.PasswordHash })
-                .FirstAsync();
-            userId = user.Id;
-            hash = user.PasswordHash;
-        }
-
         var password = Encoding.UTF8.GetBytes(loginDTO.Password.Normalize());
         if (userId is not null &&
                 Argon2id.VerifyHash(hash, password))
@@ -60,45 +50,11 @@ public static class LoginEndpoints
             var token = await LoginUtils.CreateUserSession(userId.Value, userAgent, db);
             await db.SaveChangesAsync();
 
-            ctx.Response.Cookies.Append("token", token, new CookieOptions
-            {
-                IsEssential = true,
-                SameSite = SameSiteMode.Strict,
-                Secure = ctx.Request.Scheme == "https",
-                HttpOnly = true,
-            });
-            return TypedResults.Ok(token);
+            return LoginUtils.LogUserIn(ctx, token);
         }
         return TypedResults.Forbid();
     }
 
 
-    public record LoginDTO(string? UserHandle, string? UserEmail, string Password);
-
-    private class LoginDTOValidator : AbstractValidator<LoginDTO>
-    {
-        public LoginDTOValidator(PGContext db)
-        {
-
-            RuleFor(l => l.UserHandle)
-                .Must((l, _) =>
-                        l.UserHandle is null ^ l.UserEmail is null)
-                .WithMessage("Either email or handle must be set");
-
-            RuleFor(l => l.UserEmail)
-                .MustAsync(async (email, ct) =>
-                        !await db.Users.Where(u => u.Email == email)
-                                .AnyAsync(ct))
-                .When(l => l.UserEmail is not null)
-                .WithMessage("Invalid Email");
-
-            RuleFor(l => l.UserHandle)
-                .MustAsync(async (handle, ct) =>
-                        !await db.Users.Where(u => u.UserHandle == handle)
-                                .AnyAsync(ct))
-                .When(l => l.UserHandle is not null)
-                .WithMessage("Invalid Email");
-        }
-    }
-
+    public record LoginDTO(string UserEmail, string Password);
 }

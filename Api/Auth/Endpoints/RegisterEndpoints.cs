@@ -51,7 +51,6 @@ public static class RegisterEndpoints
 
         var user = new User()
         {
-            UserHandle = dto.UserHandle,
             Email = dto.Email,
             PasswordHash = hash,
         };
@@ -71,17 +70,15 @@ public static class RegisterEndpoints
     }
 
     private static async Task<Ok<RegisterInfo>> GetRegisterInfo() => TypedResults.Ok(new RegisterInfo(
-         CanRegisterAsAdmin: await CanAdminRegister(),
-         UserHandleAcceptedRegex: User.UserHandleAcceptedRegex
+         CanRegisterAsAdmin: await CanAdminRegister()
         ));
 
 
-    public record RegisterInfo(bool CanRegisterAsAdmin, string UserHandleAcceptedRegex);
+    public record RegisterInfo(bool CanRegisterAsAdmin);
 
     public record RegisterDTO
     {
-        public required string UserHandle { get; set; }
-        public string? Email { get; set; }
+        public required string Email { get; set; }
         public required string Password { get; set; }
         public required bool AdminRegistration { get; set; }
     }
@@ -101,8 +98,6 @@ public static class RegisterEndpoints
                         .AnyAsync(ct))
                 .WithMessage("Email is already used");
 
-            RuleFor(r => r.UserHandle).Matches(User.UserHandleAcceptedRegex).WithMessage("UserHandle format is invalid");
-            RuleFor(r => r.UserHandle).MustAsync(async (uh, ct) => !await ctx.Users.Where(u => u.UserHandle == uh).AnyAsync(ct)).WithMessage("User with same handle already exists");
 
             RuleFor(r => r.AdminRegistration).MustAsync(async (adr, ct) => !adr || await CanAdminRegister()).WithMessage("Can't Register As Admin");
 

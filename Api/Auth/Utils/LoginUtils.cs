@@ -5,6 +5,7 @@ using Api.Database;
 
 using Geralt;
 
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 using NodaTime;
@@ -31,12 +32,25 @@ public static class LoginUtils
         {
             UserId = userId,
             TokenHash = tokenHash.ToArray(),
+            Permissions = UserPermissionBits.All,
             CreationTime = SystemClock.Instance.GetCurrentInstant(),
         };
 
         await ctx.UserTokens.AddAsync(dbToken);
 
         return UserTokenPrefix + PrefixSeparator + Base64Url.EncodeToString(apiToken);
+    }
+
+    public static Ok<LoginResultDTO> LogUserIn(HttpContext ctx, string token)
+    {
+        ctx.Response.Cookies.Append("user_auth_token", token, new CookieOptions
+        {
+            IsEssential = true,
+            SameSite = SameSiteMode.Strict,
+            Secure = ctx.Request.Scheme == "https",
+            HttpOnly = true,
+        });
+        return TypedResults.Ok(new LoginResultDTO(token));
     }
 
     public static async Task UpdateLastUsedForUserToken(UserToken token, PGContext ctx)
@@ -50,4 +64,6 @@ public static class LoginUtils
                         setter.SetProperty(ut => ut.LastUsed, currentTime));
         }
     }
+
+    public record LoginResultDTO(string AuthToken);
 }

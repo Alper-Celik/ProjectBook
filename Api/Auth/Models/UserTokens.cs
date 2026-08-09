@@ -15,6 +15,8 @@ public class UserToken
     [Key]
     public required byte[] TokenHash { get; set; }
 
+    public required PermissionBits Permissions { get; set; }
+
     public Instant CreationTime { get; set; }
 
     public Instant? LastUsed { get; set; }
