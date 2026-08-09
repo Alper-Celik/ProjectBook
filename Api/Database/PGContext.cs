@@ -1,18 +1,11 @@
-using Api.Auth.Models;
-
 using Microsoft.EntityFrameworkCore;
 
 using Npgsql;
 
 namespace Api.Database;
 
-public class PGContext : DbContext
+public partial class PGContext : DbContext
 {
-
-    public DbSet<User> Users { get; set; }
-
-    public DbSet<UserToken> UserTokens { get; set; }
-
     protected PGContext()
     {
     }
