@@ -21,7 +21,7 @@ public static class LoginEndpoints
     }
 
     public static async Task<Results<
-        Ok<string>,
+        Ok<LoginUtils.LoginResultDTO>,
         ForbidHttpResult
     >> Login(
             [FromServices] HttpContext ctx,

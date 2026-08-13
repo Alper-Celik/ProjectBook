@@ -16,8 +16,11 @@ public static class LoginUtils
 {
 
     public const char PrefixSeparator = '_';
+    public const string UserTokenPrefixName = "user";
+    public const string TokenCookieName = "auth_token";
 
-    public const string UserTokenPrefix = "user";
+    public static string UserTokenPrefix => UserTokenPrefixName + PrefixSeparator;
+
 
     public static async Task<string> CreateUserSession(Guid userId, string sessionName, PGContext ctx)
     {
@@ -38,12 +41,12 @@ public static class LoginUtils
 
         await ctx.UserTokens.AddAsync(dbToken);
 
-        return UserTokenPrefix + PrefixSeparator + Base64Url.EncodeToString(apiToken);
+        return UserTokenPrefix + Base64Url.EncodeToString(apiToken);
     }
 
     public static Ok<LoginResultDTO> LogUserIn(HttpContext ctx, string token)
     {
-        ctx.Response.Cookies.Append("user_auth_token", token, new CookieOptions
+        ctx.Response.Cookies.Append(TokenCookieName, token, new CookieOptions
         {
             IsEssential = true,
             SameSite = SameSiteMode.Strict,

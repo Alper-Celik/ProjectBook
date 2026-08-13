@@ -9,13 +9,15 @@ namespace Api.Auth.Models;
 [Table("user_tokens", Schema = "auth")]
 public class UserToken
 {
+    public const string PermissionBitsType = "PermissionBitsType";
+
     [ForeignKey(nameof(User))]
     public Guid UserId { get; set; }
 
     [Key]
     public required byte[] TokenHash { get; set; }
 
-    public required PermissionBits Permissions { get; set; }
+    public required UserPermissionBits Permissions { get; set; }
 
     public Instant CreationTime { get; set; }
 

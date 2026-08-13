@@ -1,6 +1,9 @@
+using Api.Auth.Middlewares;
 using Api.Database;
 
 using FluentValidation;
+
+using Microsoft.AspNetCore.Authentication;
 
 using Scalar.AspNetCore;
 
@@ -11,6 +14,9 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddValidatorsFromAssemblyContaining<PGContext>();
 builder.Services.AddFluentValidationAutoValidation();
+
+builder.Services.AddAuthentication()
+    .AddScheme<AuthenticationSchemeOptions, AuthHandler>("x_user", null);
 
 PGContext.ConfigureDB(builder.Services, builder.Configuration.GetConnectionString("PG")!);
 
@@ -29,7 +35,6 @@ app.MapFallbackToFile("index.html");
 var api = app.MapGroup("/api").AddFluentValidationAutoValidation();
 
 var auth = api.MapGroup("auth");
-
 Api.Auth.Setup.MapEndpoints(auth);
 
 app.Run();
