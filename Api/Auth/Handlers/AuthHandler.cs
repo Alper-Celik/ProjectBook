@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace Api.Auth.Middlewares;
+namespace Api.Auth.Handlers;
 
 class AuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, PGContext db)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
@@ -32,7 +32,7 @@ class AuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerF
 
             Claim[] claims = [
                 new Claim(ClaimTypes.NameIdentifier,userToken.UserId.ToString()),
-                new Claim(UserToken.PermissionBitsType,((long)userToken.Permissions).ToString())
+                new Claim(UserToken.PermissionBitsType,((long)userToken.Permissions).ToString()),
             ];
 
             return AuthenticateResult.Success(

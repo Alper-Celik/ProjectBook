@@ -1,9 +1,10 @@
-using Api.Auth.Middlewares;
+using Api.Auth.Handlers;
 using Api.Database;
 
 using FluentValidation;
 
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 
 using Scalar.AspNetCore;
 
@@ -17,17 +18,24 @@ builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddAuthentication()
     .AddScheme<AuthenticationSchemeOptions, AuthHandler>("x_user", null);
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionCheckAuthorizationHandler>();
+builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+
 
 PGContext.ConfigureDB(builder.Services, builder.Configuration.GetConnectionString("PG")!);
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseAuthentication();
+app.UseAuthorization();
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi().RequireAuthorization();
     app.MapScalarApiReference();
 }
+
 
 app.UseStaticFiles();
 app.MapFallbackToFile("index.html");
