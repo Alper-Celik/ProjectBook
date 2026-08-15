@@ -1,0 +1,59 @@
+# SPDX-FileCopyrightText: 2026 Alper Çelik <alper@alper-celik.dev>
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: Apache-2.0
+
+name: CI
+on:
+  - push
+  - pull_request
+  - workflow_dispatch
+
+jobs:
+  ci:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: nix develop .#ci --command bash --noprofile --norc -eo pipefail {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        background: true
+
+      - name: InstallNix
+        uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: cachix/cachix-action@v17
+        with:
+          name: projectbook
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+
+      - wait-all:
+
+      - name: Install Deps
+        run: nix develop .#ci --command ls
+
+      - name: Run ReUse Lint
+        background: true
+        run: reuse lint
+
+      - name: Dotnet Lint
+        background: true
+        run: |
+          export DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION=1
+          export TERM=xterm-256color
+          printf "\033[44m=>    dotnet restore\n\033[0m"
+          dotnet restore --locked-mode
+
+          printf "\033[44m=>    dotnet format\n\033[0m"
+          dotnet format --verify-no-changes --verbosity diagnostic --no-restore
+
+          printf "\033[44m=>    dotnet build\n\033[0m"
+          dotnet build --no-restore
+
+          printf "\033[44m=>    dotnet test\n\033[0m"
+          dotnet test --no-restore
+
+      - wait-all:

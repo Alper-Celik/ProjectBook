@@ -38,11 +38,13 @@
               packages = with pkgs; [
                 dotnet
                 nodejs_22
+                reuse
               ];
 
               DOTNET_ROOT = "${dotnet}/share/dotnet";
               DOTNET_PATH = "${dotnet}/bin/dotnet";
             };
+          devShells.ci = config.devShells.default;
         };
     };
 }
