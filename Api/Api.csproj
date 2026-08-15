@@ -9,11 +9,7 @@ SPDX-License-Identifier: Apache-2.0
 
 
   <PropertyGroup>
-    <SpaRoot>../Frontend/</SpaRoot>
-    <SpaProxyServerUrl>http://localhost:51234</SpaProxyServerUrl>
-    <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
-
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -28,7 +24,6 @@ SPDX-License-Identifier: Apache-2.0
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="Geralt" Version="4.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.6" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="10.0.8" />
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -40,19 +35,4 @@ SPDX-License-Identifier: Apache-2.0
     <PackageReference Include="Scalar.AspNetCore" Version="2.14.14" />
     <PackageReference Include="SharpGrip.FluentValidation.AutoValidation.Endpoints" Version="2.0.0" />
   </ItemGroup>
-
-    <Target Name="PublishFrontend" AfterTargets="ComputeFilesToPublish">
-      <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-      <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
-
-      <ItemGroup>
-        <DistFiles Include="$(SpaRoot)dist\**" />
-        <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-          <RelativePath>wwwroot\%(RecursiveDir)%(FileName)%(Extension)</RelativePath>
-          <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </ResolvedFileToPublish>
-      </ItemGroup>
-    </Target>
-
 </Project>
