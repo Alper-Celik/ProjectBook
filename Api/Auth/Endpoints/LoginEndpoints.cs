@@ -24,7 +24,8 @@ public static class LoginEndpoints
         route.MapPost("login", Login);
     }
 
-    public static async Task<Results<
+    public static async Task<
+    Results<
         Ok<LoginUtils.LoginResultDTO>,
         ForbidHttpResult
     >> Login(

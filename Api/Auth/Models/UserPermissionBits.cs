@@ -7,5 +7,7 @@ namespace Api.Auth.Models;
 [Flags]
 public enum UserPermissionBits : long
 {
-    All = ~0
+    All = ~0,
+    WorkRead = 1L >> 0,
+
 }

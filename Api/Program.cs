@@ -49,4 +49,8 @@ var api = app.MapGroup("/api").AddFluentValidationAutoValidation();
 var auth = api.MapGroup("auth");
 Api.Auth.Setup.MapEndpoints(auth);
 
+var works = api.MapGroup("works");
+Api.Auth.Setup.MapEndpoints(works);
+
 app.Run();
+
