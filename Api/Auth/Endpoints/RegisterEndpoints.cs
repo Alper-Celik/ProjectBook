@@ -55,6 +55,7 @@ public static class RegisterEndpoints
 
         var user = new User()
         {
+            Id = Guid.CreateVersion7(),
             Email = dto.Email,
             PasswordHash = hash,
         };

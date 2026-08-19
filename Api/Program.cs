@@ -2,6 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using Api.Auth.Handlers;
 using Api.Database;
 
@@ -9,11 +12,21 @@ using FluentValidation;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Json;
 
 using Scalar.AspNetCore;
 
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.DefaultIgnoreCondition =
+        JsonIgnoreCondition.WhenWritingNull;
+    options.SerializerOptions.PropertyNamingPolicy =
+        JsonNamingPolicy.CamelCase;
+});
 
 builder.Services.AddOpenApi();
 
@@ -50,7 +63,6 @@ var auth = api.MapGroup("auth");
 Api.Auth.Setup.MapEndpoints(auth);
 
 var works = api.MapGroup("works");
-Api.Auth.Setup.MapEndpoints(works);
+Api.Works.Setup.MapEndpoints(works);
 
 app.Run();
-

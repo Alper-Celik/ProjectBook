@@ -1,0 +1,56 @@
+// SPDX-FileCopyrightText: 2026 Alper Çelik <alper@alper-celik.dev>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Riok.Mapperly.Abstractions;
+
+namespace Api.Works.Models;
+
+[Table("authors", Schema = "main")]
+public class Author
+{
+    [Key]
+    public Guid Id { get; set; }
+    public int RowVersion { get; set; }
+
+    public string? FirstName { get; set; }
+
+    public string? LastName { get; set; }
+
+    public required string DisplayName { get; set; }
+
+    public required List<string> PenNames { get; set; }
+
+    // Navigation Properties
+    [MapperIgnore]
+    public List<Work>? Works { get; set; }
+}
+
+[Table("work___author", Schema = "main")]
+[PrimaryKey(nameof(WorkId), nameof(AuthorId))]
+public class Work_Author
+{
+    public Guid WorkId { get; set; }
+    public Guid AuthorId { get; set; }
+
+    // Navigation Properties
+    public Work? Work { get; set; }
+    public Author? Author { get; set; }
+}
+
+public class AuthorTypeConfiguration : IEntityTypeConfiguration<Author>
+{
+    public void Configure(EntityTypeBuilder<Author> builder)
+    {
+        builder
+            .HasMany(a => a.Works)
+            .WithMany(w => w.Authors)
+            .UsingEntity(nameof(Work_Author));
+    }
+}

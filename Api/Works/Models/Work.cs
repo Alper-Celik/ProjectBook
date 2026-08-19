@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Api.Works.Models;
@@ -9,7 +10,10 @@ namespace Api.Works.Models;
 [Table("works", Schema = "main")]
 public class Work
 {
+    [Key]
     public Guid Id { get; set; }
+    public int RowVersion { get; set; }
+
 
     public Guid OwnerId { get; set; }
 
@@ -17,7 +21,14 @@ public class Work
 
     public string? Description { get; set; }
 
+    public NodaTime.Instant MetadataAddedAt { get; set; }
+    public NodaTime.Instant MetadataUpdatedAt { get; set; }
+
+    public NodaTime.ZonedDateTime? WorkPublishedAt { get; set; }
+    public NodaTime.ZonedDateTime? WorkUpdatedAt { get; set; }
+
     // Navigation Properties
     public List<WorkTag>? WorkTags { get; set; }
     public List<WorkIdentifier>? WorkIdentifiers { get; set; }
+    public List<Author>? Authors { get; set; }
 }

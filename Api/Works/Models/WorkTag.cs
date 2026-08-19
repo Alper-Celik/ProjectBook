@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 using Api.Auth.Models;
 
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Api.Works.Models;
 
+[Table("work_tags", Schema = "main")]
 [Index(nameof(OwnerId), nameof(TagName), IsUnique = true)]
 public class WorkTag
 {
@@ -24,18 +26,18 @@ public class WorkTag
     public required string TagName { get; set; }
 
     // Navigation Properties
-    public List<WorkTagWork>? WorkTagWorks { get; set; }
+    public List<WorkTag_Work>? WorkTagWorks { get; set; }
     public List<Work>? Works { get; set; }
     public User? Owner { get; set; }
 
 }
 
 
+[Table("work_tag___tag", Schema = "main")]
 [PrimaryKey(nameof(WorkId), nameof(WorkTagId))]
-public class WorkTagWork
+public class WorkTag_Work
 {
     public Guid WorkId { get; set; }
-
     public Guid WorkTagId { get; set; }
 
     // Navigation Properties
@@ -50,6 +52,6 @@ public class WorkTagTypeConfiguration : IEntityTypeConfiguration<WorkTag>
         builder
             .HasMany(wt => wt.Works)
             .WithMany(w => w.WorkTags)
-            .UsingEntity(nameof(WorkTagWork));
+            .UsingEntity(nameof(WorkTag_Work));
     }
 }

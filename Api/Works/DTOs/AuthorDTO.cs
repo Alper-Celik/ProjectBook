@@ -1,6 +1,10 @@
+using Api.Works.Models;
+
+using Riok.Mapperly.Abstractions;
+
 namespace Api.Works.DTOs;
 
-public record AuthorDTO(
+public record struct AuthorDTO(
         Guid Id,
         int RowVersion,
         string? FirstName,
@@ -8,3 +12,9 @@ public record AuthorDTO(
         string DisplayName,
         string[] PenNames
         );
+
+[Mapper]
+public static partial class AuthorDTOMapper
+{
+    public static partial IQueryable<AuthorDTO> ProjectToDTO(IQueryable<Author> q);
+}

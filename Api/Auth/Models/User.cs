@@ -16,7 +16,8 @@ public class User
 {
     public const string UserHandleAcceptedRegex = @"^[a-zA-Z0-9_\-]{3,30}$";
 
-    public Guid Id { get; set; } = Guid.CreateVersion7();
+    [Key]
+    public Guid Id { get; set; }
 
     [EmailAddress]
     public required string Email { get; set; }

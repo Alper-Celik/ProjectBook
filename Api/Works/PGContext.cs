@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-using Api.Auth.Models;
+using Api.Works.Models;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +10,11 @@ namespace Api.Database;
 
 public partial class PGContext : DbContext
 {
-    public DbSet<User> Users { get; set; }
+    public DbSet<Work> Works { get; set; }
 
-    public DbSet<UserToken> UserTokens { get; set; }
+    public DbSet<WorkIdentifier> WorkIdentifiers { get; set; }
+
+    public DbSet<WorkTag> WorkTags { get; set; }
+
+    public DbSet<Author> Authors { get; set; }
 }
