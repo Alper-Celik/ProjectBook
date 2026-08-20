@@ -1,6 +1,7 @@
 using System.Security.Claims;
 
 using Api.Auth.Handlers;
+using Api.Auth.Utils;
 using Api.Database;
 using Api.Works.DTOs;
 
@@ -18,33 +19,54 @@ public static class WorkEndpoints
     }
 
     [PermissionCheckAuthorize(Auth.Models.UserPermissionBits.WorkRead)]
-    public static async Task<
-        Results<
-             Ok<WorksGetDTO>,
-             NotFound,
-             BadRequest
-        >> GetWorks(
-                [FromServices] PGContext db,
-                [FromServices] ClaimsPrincipal claims
-                )
+    public static async Task<Results<
+        Ok<WorkGetDTO>,
+        NotFound,
+        BadRequest>>
+            GetWork(
+                    [FromServices] PGContext db,
+                    [FromServices] CurrentUserId userId,
+
+                    [FromRoute] Guid workId
+                    )
     {
-        Guid userId;
 
-        if (claims.FindFirstValue(ClaimTypes.NameIdentifier) is { } userIdStr)
-        {
-            userId = Guid.Parse(userIdStr);
-        }
-        else
-        {
+        if (userId.Id is null)
             return TypedResults.BadRequest();
-        }
 
-        var works = WorkSmallDTOMapper.ProjectToDTO(db.Works).ToArray();
+        var work = await db.Works
+            .Include(w => w.Authors)
+            .Include(w => w.WorkTags)
+            .Include(w => w.WorkIdentifiers)
+            .FirstOrDefaultAsync(w => w.OwnerId == userId.Id && w.Id == workId);
+
+        return work switch
+        {
+            null => TypedResults.NotFound(),
+            _ => TypedResults.Ok(WorkGetDTOMapper.ToDto(work)),
+        };
+    }
+
+    [PermissionCheckAuthorize(Auth.Models.UserPermissionBits.WorkRead)]
+    public static async Task<
+    Results<
+         Ok<WorksGetDTO>,
+         NotFound,
+         BadRequest>>
+    GetWorks(
+            [FromServices] PGContext db,
+            [FromServices] CurrentUserId userId
+            )
+    {
+        if (userId.Id is null)
+            return TypedResults.BadRequest();
+
+        var works = WorkSmallDTOMapper.ProjectToDTO(db.Works.Where(w => w.OwnerId == userId.Id)).ToArray();
 
         var referencedAuthorsIds = works
             .SelectMany(w => w.AuthorIds)
             .Distinct().ToArray();
-        var referencedAuthors = AuthorDTOMapper.ProjectToDTO(db.Authors
+        var referencedAuthors = AuthorGetDTOMapper.ProjectToDTO(db.Authors
                 .Where(a => referencedAuthorsIds
                 .Contains(a.Id))).ToArray();
 

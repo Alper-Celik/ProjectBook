@@ -4,7 +4,7 @@ using Riok.Mapperly.Abstractions;
 
 namespace Api.Works.DTOs;
 
-public record struct AuthorDTO(
+public record AuthorGetDTO(
         Guid Id,
         int RowVersion,
         string? FirstName,
@@ -14,7 +14,7 @@ public record struct AuthorDTO(
         );
 
 [Mapper]
-public static partial class AuthorDTOMapper
+public static partial class AuthorGetDTOMapper
 {
-    public static partial IQueryable<AuthorDTO> ProjectToDTO(IQueryable<Author> q);
+    public static partial IQueryable<AuthorGetDTO> ProjectToDTO(IQueryable<Author> q);
 }

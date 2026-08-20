@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,7 @@ namespace Api.Works.Models;
         IsUnique = true)]
 public class WorkIdentifier
 {
+    [Key]
     public Guid Id { get; set; }
 
     [ForeignKey(nameof(Work))]
@@ -27,5 +29,5 @@ public class WorkIdentifier
 
 
     // Navigation Properties
-    public Work? Work { get; set; }
+    public Work Work { get; set; } = null!;
 }

@@ -5,6 +5,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Riok.Mapperly.Abstractions;
+
 namespace Api.Works.Models;
 
 [Table("works", Schema = "main")]
@@ -15,6 +17,7 @@ public class Work
     public int RowVersion { get; set; }
 
 
+    [MapperIgnore]
     public Guid OwnerId { get; set; }
 
     public required string Title { get; set; }
@@ -28,7 +31,7 @@ public class Work
     public NodaTime.ZonedDateTime? WorkUpdatedAt { get; set; }
 
     // Navigation Properties
-    public List<WorkTag>? WorkTags { get; set; }
-    public List<WorkIdentifier>? WorkIdentifiers { get; set; }
-    public List<Author>? Authors { get; set; }
+    public List<WorkTag> WorkTags { get; set; } = [];
+    public List<WorkIdentifier> WorkIdentifiers { get; set; } = [];
+    public List<Author> Authors { get; set; } = [];
 }

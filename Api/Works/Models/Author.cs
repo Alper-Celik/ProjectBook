@@ -29,7 +29,7 @@ public class Author
 
     // Navigation Properties
     [MapperIgnore]
-    public List<Work>? Works { get; set; }
+    public List<Work> Works { get; set; } = [];
 }
 
 [Table("work___author", Schema = "main")]
@@ -40,8 +40,8 @@ public class Work_Author
     public Guid AuthorId { get; set; }
 
     // Navigation Properties
-    public Work? Work { get; set; }
-    public Author? Author { get; set; }
+    public Work Work { get; set; } = null!;
+    public Author Author { get; set; } = null!;
 }
 
 public class AuthorTypeConfiguration : IEntityTypeConfiguration<Author>

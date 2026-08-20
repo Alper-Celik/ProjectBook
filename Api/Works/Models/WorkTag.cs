@@ -18,6 +18,7 @@ public class WorkTag
 {
     [Key]
     public Guid Id { get; set; }
+    public int RowVersion { get; set; }
 
     public Guid OwnerId { get; set; }
 
@@ -26,9 +27,9 @@ public class WorkTag
     public required string TagName { get; set; }
 
     // Navigation Properties
-    public List<WorkTag_Work>? WorkTagWorks { get; set; }
-    public List<Work>? Works { get; set; }
-    public User? Owner { get; set; }
+    public List<WorkTag_Work> WorkTagWorks { get; set; } = null!;
+    public List<Work> Works { get; set; } = null!;
+    public User Owner { get; set; } = null!;
 
 }
 
@@ -41,8 +42,8 @@ public class WorkTag_Work
     public Guid WorkTagId { get; set; }
 
     // Navigation Properties
-    public Work? Work { get; set; }
-    public WorkTag? WorkTag { get; set; }
+    public Work Work { get; set; } = null!;
+    public WorkTag WorkTag { get; set; } = null!;
 }
 
 public class WorkTagTypeConfiguration : IEntityTypeConfiguration<WorkTag>
