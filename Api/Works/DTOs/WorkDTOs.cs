@@ -2,7 +2,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+using Api.Auth.Utils;
+using Api.Database;
 using Api.Works.Models;
+
+using FluentValidation;
 
 using Riok.Mapperly.Abstractions;
 
@@ -23,6 +27,7 @@ public record WorkUpdateDTO(
         WorkIdentifierDTO[] WorkIdentifiers
         );
 
+#region WorkGetDTO
 public record WorkGetDTO(
         Guid Id,
         int RowVersion,
@@ -48,7 +53,9 @@ public static partial class WorkGetDTOMapper
     [MapProperty(nameof(Work.WorkTags), nameof(WorkGetDTO.Tags))]
     public static partial WorkGetDTO ToDto(Work w);
 }
+#endregion
 
+#region WorkAddDTO
 public record WorkAddDTO(
         string Title,
         string? Description,
@@ -62,6 +69,42 @@ public record WorkAddDTO(
         WorkIdentifierDTO[] WorkIdentifiers
         );
 
+public class WorkAddDTOValidator : AbstractValidator<WorkAddDTO>
+{
+    public WorkAddDTOValidator(PGContext db, ICurrentUserId userId)
+    {
+        RuleFor(w => w.TagIds)
+            .Must(ids => ids.Length == ids.Distinct().Count())
+            .WithMessage("Duplicate tagIds are forbidden");
+
+        RuleFor(w => w.TagIds)
+            .MustAsync(async (ids, ct) =>
+                    await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.CountAsync(
+                     db.WorkTags
+                    .Where(wt => wt.OwnerId == userId.Id
+                        && ids.Contains(wt.Id)), ct)
+                    == ids.Length
+                    )
+            .WithMessage("Some or all tagIds doesn't exist");
+
+
+
+        RuleFor(w => w.AuthorIds)
+           .Must(ids => ids.Length == ids.Distinct().Count())
+           .WithMessage("Duplicate AuthorIds are forbidden");
+
+        RuleFor(w => w.AuthorIds)
+            .MustAsync(async (ids, ct) =>
+                    await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.CountAsync(
+                     db.WorkTags
+                    .Where(wt => wt.OwnerId == userId.Id
+                        && ids.Contains(wt.Id)), ct)
+                    == ids.Length
+                    )
+            .WithMessage("Some or all AuthorIds doesn't exist");
+    }
+}
+#endregion
 public record struct WorkIdentifierDTO(
         string WorkIdentifierType,
         string WorkIdentifierValue
@@ -73,6 +116,7 @@ public record struct WorksGetDTO(
         WorkSmallDTO[] Works
         );
 
+#region WorkSmallDto
 public record struct WorkSmallDTO(
         Guid Id,
         string Title,
@@ -91,3 +135,4 @@ public static partial class WorkSmallDTOMapper
     ));
 
 }
+#endregion
