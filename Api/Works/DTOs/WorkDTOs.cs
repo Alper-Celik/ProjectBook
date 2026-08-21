@@ -69,6 +69,44 @@ public record WorkAddDTO(
         WorkIdentifierDTO[] WorkIdentifiers
         );
 
+[Mapper]
+public static partial class WorkAddDTOMapper
+{
+
+    public static Work FromWorkAddDTO(WorkAddDTO w)
+    {
+        var id = Guid.CreateVersion7();
+        return new Work()
+        {
+            Id = id,
+            Title = w.Title,
+            Description = w.Description,
+
+            WorkPublishedAt = w.WorkPublishedAt,
+            WorkUpdatedAt = w.WorkUpdatedAt,
+
+            WorkTag_Works = [.. w.TagIds.Select(wTagId => new WorkTag_Work(){
+                    WorkId = id,
+                    WorkTagId =wTagId
+                    })],
+
+            Work_Authors = [.. w.AuthorIds.Select(wAuthorId => new Work_Author(){
+                    WorkId = id,
+                    AuthorId = wAuthorId
+                    })],
+
+            WorkIdentifiers = [.. w.WorkIdentifiers.Select(wid => new WorkIdentifier()
+            {
+                Id = Guid.CreateVersion7(),
+                WorkId = id,
+                WorkIdentifierType = wid.WorkIdentifierType,
+                WorkIdentifierValue = wid.WorkIdentifierValue
+            })],
+
+        };
+    }
+}
+
 public class WorkAddDTOValidator : AbstractValidator<WorkAddDTO>
 {
     public WorkAddDTOValidator(PGContext db, ICurrentUserId userId)

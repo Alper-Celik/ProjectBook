@@ -34,4 +34,9 @@ public class Work
     public List<WorkTag> WorkTags { get; set; } = [];
     public List<WorkIdentifier> WorkIdentifiers { get; set; } = [];
     public List<Author> Authors { get; set; } = [];
+
+    [MapperIgnore]
+    public List<WorkTag_Work> WorkTag_Works { get; set; } = [];
+    [MapperIgnore]
+    public List<Work_Author> Work_Authors { get; set; } = [];
 }

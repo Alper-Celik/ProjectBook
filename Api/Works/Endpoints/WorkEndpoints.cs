@@ -8,6 +8,7 @@ using Api.Auth.Handlers;
 using Api.Auth.Utils;
 using Api.Database;
 using Api.Works.DTOs;
+using Api.Works.Models;
 
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +20,32 @@ public static class WorkEndpoints
 {
     public static void Map(IEndpointRouteBuilder route)
     {
+        route.MapPost("", AddWork);
         route.MapGet("", GetWorks);
+    }
+
+    public static async Task<Results<
+        Ok<WorkGetDTO>,
+        BadRequest>>
+        AddWork(
+                [FromServices] PGContext db,
+                [FromServices] ICurrentUserId userId,
+
+                [FromBody] WorkAddDTO workDto
+                )
+    {
+
+        if (userId.Id is null)
+            return TypedResults.BadRequest();
+
+        var work = WorkAddDTOMapper.FromWorkAddDTO(workDto);
+
+        await db.Works.AddAsync(work);
+
+        await db.Entry(work).Collection(w => w.Authors).LoadAsync();
+        await db.Entry(work).Collection(w => w.WorkTags).LoadAsync();
+
+        return TypedResults.Ok(WorkGetDTOMapper.ToDto(work));
     }
 
     [PermissionCheckAuthorize(Auth.Models.UserPermissionBits.WorkRead)]
@@ -81,5 +107,4 @@ public static class WorkEndpoints
             ReferencedAuthors = referencedAuthors
         });
     }
-
 }
