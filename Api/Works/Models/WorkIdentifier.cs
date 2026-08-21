@@ -10,16 +10,12 @@ using Microsoft.EntityFrameworkCore;
 namespace Api.Works.Models;
 
 [Table("works_ids", Schema = "main")]
-[Index(
-        nameof(WorkId),
+[PrimaryKey(
         nameof(WorkIdentifierType),
         nameof(WorkIdentifier),
-        IsUnique = true)]
+        nameof(WorkId))]
 public class WorkIdentifier
 {
-    [Key]
-    public Guid Id { get; set; }
-
     [ForeignKey(nameof(Work))]
     public Guid WorkId { get; set; }
 
