@@ -8,6 +8,13 @@ namespace Api.Auth.Models;
 public enum UserPermissionBits : long
 {
     All = ~0,
-    WorkRead = 1L >> 0,
+    WorkRead = 1L << 0,
+    WorkWrite = 1L << 1,
+
+    AuthorRead = 1L << 2,
+    AuthorWrite = 1L << 3,
+
+    WorkTagRead = 1L << 4,
+    WorkTagWrite = 1L << 5,
 
 }

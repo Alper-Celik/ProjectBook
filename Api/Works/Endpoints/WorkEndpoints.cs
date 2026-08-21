@@ -5,6 +5,7 @@
 using System.Security.Claims;
 
 using Api.Auth.Handlers;
+using Api.Auth.Models;
 using Api.Auth.Utils;
 using Api.Database;
 using Api.Works.DTOs;
@@ -21,9 +22,14 @@ public static class WorkEndpoints
     public static void Map(IEndpointRouteBuilder route)
     {
         route.MapPost("", AddWork);
+        route.MapGet("{workId}", GetWork);
         route.MapGet("", GetWorks);
     }
 
+    [PermissionCheckAuthorize(
+            UserPermissionBits.WorkWrite |
+            UserPermissionBits.AuthorRead |
+            UserPermissionBits.WorkTagRead)]
     public static async Task<Results<
         Ok<WorkGetDTO>,
         BadRequest>>
@@ -48,7 +54,10 @@ public static class WorkEndpoints
         return TypedResults.Ok(WorkGetDTOMapper.ToDto(work));
     }
 
-    [PermissionCheckAuthorize(Auth.Models.UserPermissionBits.WorkRead)]
+    [PermissionCheckAuthorize(
+            UserPermissionBits.WorkRead |
+            UserPermissionBits.AuthorRead |
+            UserPermissionBits.WorkTagRead)]
     public static async Task<Results<
         Ok<WorkGetDTO>,
         NotFound,
@@ -77,7 +86,7 @@ public static class WorkEndpoints
         };
     }
 
-    [PermissionCheckAuthorize(Auth.Models.UserPermissionBits.WorkRead)]
+    [PermissionCheckAuthorize(UserPermissionBits.WorkRead | UserPermissionBits.AuthorRead)]
     public static async Task<
     Results<
          Ok<WorksGetDTO>,
