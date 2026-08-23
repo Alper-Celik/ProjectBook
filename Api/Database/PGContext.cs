@@ -8,16 +8,8 @@ using Npgsql;
 
 namespace Api.Database;
 
-public partial class PGContext : DbContext
+public partial class PGContext(DbContextOptions options) : DbContext(options)
 {
-    protected PGContext()
-    {
-    }
-
-    public PGContext(DbContextOptions options) : base(options)
-    {
-    }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder
         .UseSnakeCaseNamingConvention()

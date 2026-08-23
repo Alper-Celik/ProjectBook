@@ -42,6 +42,7 @@ builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPo
 PGContext.ConfigureDB(builder.Services, builder.Configuration.GetConnectionString("PG")!);
 
 Api.Auth.Setup.RegisterServices(builder.Services);
+Api.Database.Setup.RegisterServices(builder.Services);
 
 var app = builder.Build();
 

@@ -11,6 +11,7 @@ public static class Setup
     public static void RegisterServices(IServiceCollection services)
     {
         services.AddScoped<ICurrentUserId, CurrentUserId>();
+        services.AddHttpContextAccessor();
     }
 
     public static void MapEndpoints(IEndpointRouteBuilder route)
