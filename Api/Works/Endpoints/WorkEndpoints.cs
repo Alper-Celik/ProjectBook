@@ -91,8 +91,6 @@ public static class WorkEndpoints
         updatedWork.MetadataAddedAt = workPre.MetadataAddedAt;
         updatedWork.MetadataUpdatedAt = NodaTime.SystemClock.Instance.GetCurrentInstant();
 
-        await db.WorkIdentifiers.Where(wid => wid.WorkId == workId).ExecuteDeleteAsync();
-
         db.Works.Update(updatedWork);
         await db.SaveChangesAsync();
 
@@ -124,7 +122,6 @@ public static class WorkEndpoints
         var work = await db.Works
             .Include(w => w.Authors)
             .Include(w => w.WorkTags)
-            .Include(w => w.WorkIdentifiers)
             .FirstOrDefaultAsync(w => w.OwnerId == userId.Id && w.Id == workId);
 
         return work switch

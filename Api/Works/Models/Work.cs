@@ -5,6 +5,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
 using Riok.Mapperly.Abstractions;
 
 namespace Api.Works.Models;
@@ -29,14 +32,33 @@ public class Work
 
     public NodaTime.ZonedDateTime? WorkPublishedAt { get; set; }
     public NodaTime.ZonedDateTime? WorkUpdatedAt { get; set; }
+    public List<WorkIdentifier> WorkIdentifiers { get; set; } = [];
 
     // Navigation Properties
     public List<WorkTag> WorkTags { get; set; } = [];
-    public List<WorkIdentifier> WorkIdentifiers { get; set; } = [];
     public List<Author> Authors { get; set; } = [];
 
     [MapperIgnore]
     public List<WorkTag_Work> WorkTag_Works { get; set; } = [];
     [MapperIgnore]
     public List<Work_Author> Work_Authors { get; set; } = [];
+}
+
+public record WorkIdentifier(
+        string WorkIdentifierType,
+        string WorkIdentifierValue);
+
+public class WorkTypeConfiguration : IEntityTypeConfiguration<Work>
+{
+    public void Configure(EntityTypeBuilder<Work> builder)
+    {
+        builder
+            .ComplexCollection(w => w.WorkIdentifiers, wid => wid.ToJson())
+            .HasIndex(w => w.WorkIdentifiers
+                    .Select(wid => new
+                    {
+                        wid.WorkIdentifierType,
+                        wid.WorkIdentifierValue
+                    })).IsUnique(true);
+    }
 }

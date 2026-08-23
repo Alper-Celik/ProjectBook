@@ -59,12 +59,9 @@ public static partial class WorkUpdateDTOMapper
                     AuthorId = wAuthorId
                     })],
 
-            WorkIdentifiers = [.. w.WorkIdentifiers.Select(wid => new WorkIdentifier()
-            {
-                WorkId = w.Id,
-                WorkIdentifierType = wid.WorkIdentifierType,
-                WorkIdentifierValue = wid.WorkIdentifierValue
-            })],
+            WorkIdentifiers = [.. w.WorkIdentifiers.Select(wid =>
+                    new WorkIdentifier(wid.WorkIdentifierType,wid.WorkIdentifierValue)
+            )],
 
         };
     }
@@ -199,12 +196,9 @@ public static partial class WorkAddDTOMapper
                     AuthorId = wAuthorId
                     })],
 
-            WorkIdentifiers = [.. w.WorkIdentifiers.Select(wid => new WorkIdentifier()
-            {
-                WorkId = id,
-                WorkIdentifierType = wid.WorkIdentifierType,
-                WorkIdentifierValue = wid.WorkIdentifierValue
-            })],
+            WorkIdentifiers = [.. w.WorkIdentifiers.Select(wid =>
+                    new WorkIdentifier (wid.WorkIdentifierType,wid.WorkIdentifierValue)
+                    )],
 
         };
     }
