@@ -53,6 +53,6 @@ public class WorkTagTypeConfiguration : IEntityTypeConfiguration<WorkTag>
         builder
             .HasMany(wt => wt.Works)
             .WithMany(w => w.WorkTags)
-            .UsingEntity(nameof(WorkTag_Work));
+            .UsingEntity(typeof(WorkTag_Work));
     }
 }

@@ -12,8 +12,6 @@ public partial class PGContext : DbContext
 {
     public DbSet<Work> Works { get; set; }
 
-    public DbSet<WorkIdentifier> WorkIdentifiers { get; set; }
-
     public DbSet<WorkTag> WorkTags { get; set; }
 
     public DbSet<Author> Authors { get; set; }

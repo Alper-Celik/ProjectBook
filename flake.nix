@@ -32,7 +32,7 @@
         {
           devShells.default =
             let
-              dotnet = pkgs.dotnetCorePackages.sdk_10_0;
+              dotnet = pkgs.dotnetCorePackages.sdk_11_0;
             in
             pkgs.mkShell {
               packages = with pkgs; [

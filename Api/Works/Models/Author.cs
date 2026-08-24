@@ -51,6 +51,6 @@ public class AuthorTypeConfiguration : IEntityTypeConfiguration<Author>
         builder
             .HasMany(a => a.Works)
             .WithMany(w => w.Authors)
-            .UsingEntity(nameof(Work_Author));
+            .UsingEntity(typeof(Work_Author));
     }
 }

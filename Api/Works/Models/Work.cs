@@ -54,11 +54,6 @@ public class WorkTypeConfiguration : IEntityTypeConfiguration<Work>
     {
         builder
             .ComplexCollection(w => w.WorkIdentifiers, wid => wid.ToJson())
-            .HasIndex(w => w.WorkIdentifiers
-                    .Select(wid => new
-                    {
-                        wid.WorkIdentifierType,
-                        wid.WorkIdentifierValue
-                    })).IsUnique(true);
+            .HasIndex(w => w.WorkIdentifiers.Select(wid => wid));
     }
 }
