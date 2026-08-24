@@ -37,11 +37,11 @@ jobs:
 
       - name: Run ReUse Lint
         background: true
-        run: just reuse
+        run: just reuse-check
 
       - name: Dotnet Ci
         background: true
         run: |
-          just dotnet-ci
+          just ci-dotnet
 
       - wait-all:
