@@ -16,11 +16,14 @@ public enum TagSortOption
 }
 
 public record TagGetDTO(
-       Guid Id,
-       int RowVersion,
-       string TagType,
-       string TagName
-        );
+        Guid Id,
+        int RowVersion,
+        NodaTime.Instant MetadataAddedAt,
+        NodaTime.Instant MetadataUpdatedAt,
+
+        string TagType,
+        string TagName
+        ) : IEntityMetadata;
 
 [Mapper]
 public static partial class TagGetDTOMapper

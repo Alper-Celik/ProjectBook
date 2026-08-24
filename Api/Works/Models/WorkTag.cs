@@ -14,7 +14,7 @@ namespace Api.Works.Models;
 
 [Table("work_tags", Schema = "main")]
 [Index(nameof(OwnerId), nameof(TagName), IsUnique = true)]
-public class WorkTag
+public class WorkTag : IEntityMetadata
 {
     [Key]
     public Guid Id { get; set; }

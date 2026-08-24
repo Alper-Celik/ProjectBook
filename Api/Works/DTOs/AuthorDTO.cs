@@ -11,11 +11,14 @@ namespace Api.Works.DTOs;
 public record AuthorGetDTO(
         Guid Id,
         int RowVersion,
+        NodaTime.Instant MetadataAddedAt,
+        NodaTime.Instant MetadataUpdatedAt,
+
         string? FirstName,
         string? LastName,
         string DisplayName,
         string[] PenNames
-        );
+        ) : IEntityMetadata;
 
 [Mapper]
 public static partial class AuthorGetDTOMapper

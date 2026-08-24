@@ -13,7 +13,7 @@ using Riok.Mapperly.Abstractions;
 namespace Api.Works.Models;
 
 [Table("works", Schema = "main")]
-public class Work
+public class Work : IEntityMetadata
 {
     [Key]
     public Guid Id { get; set; }

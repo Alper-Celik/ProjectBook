@@ -128,12 +128,11 @@ public class WorkUpdateDTOValidator : AbstractValidator<WorkUpdateDTO>
 public record WorkGetDTO(
         Guid Id,
         int RowVersion,
+        NodaTime.Instant MetadataAddedAt,
+        NodaTime.Instant MetadataUpdatedAt,
 
         string Title,
         string? Description,
-
-        NodaTime.Instant MetadataAddedAt,
-        NodaTime.Instant MetadataUpdatedAt,
 
         NodaTime.ZonedDateTime? WorkPublishedAt,
         NodaTime.ZonedDateTime? WorkUpdatedAt,
@@ -142,7 +141,7 @@ public record WorkGetDTO(
         AuthorGetDTO[] Authors,
 
         WorkIdentifierDTO[] WorkIdentifiers
-        );
+        ) : IEntityMetadata;
 
 [Mapper]
 public static partial class WorkGetDTOMapper
