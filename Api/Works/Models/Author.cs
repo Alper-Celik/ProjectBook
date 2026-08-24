@@ -18,6 +18,8 @@ public class Author
     [Key]
     public Guid Id { get; set; }
     public int RowVersion { get; set; }
+    public NodaTime.Instant MetadataAddedAt { get; set; }
+    public NodaTime.Instant MetadataUpdatedAt { get; set; }
 
     public string? FirstName { get; set; }
 

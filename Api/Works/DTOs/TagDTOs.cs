@@ -8,6 +8,13 @@ using Riok.Mapperly.Abstractions;
 
 namespace Api.Works.DTOs;
 
+public enum TagSortOption
+{
+    Id,
+    TagType,
+    TagName
+}
+
 public record TagGetDTO(
        Guid Id,
        int RowVersion,
@@ -18,5 +25,5 @@ public record TagGetDTO(
 [Mapper]
 public static partial class TagGetDTOMapper
 {
-    public static partial IQueryable<TagGetDTO> ProjectToDTO(IQueryable<WorkTag> q);
+    public static partial IQueryable<TagGetDTO> ProjectToDTO(this IQueryable<WorkTag> q);
 }
