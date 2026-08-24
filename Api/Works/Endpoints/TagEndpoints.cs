@@ -36,39 +36,29 @@ public static class TagEndpoints
                     [FromServices] PGContext db,
                     [FromServices] ICurrentUserId userId,
 
-                    [FromQuery] string[]? tagTypes,
-                    [FromQuery] TagSortOption[]? sortOptions,
-                    [FromQuery] Guid[]? workIds,
-                    [FromQuery] Guid[]? tagIds,
-                    [FromQuery][Range(0, 1000)] int pageSize = 30,
-                    [FromQuery][Range(1, int.MaxValue)] int page = 1
+                    [FromBody] TagQueryDTO queryDTO
                     )
     {
         if (userId.Id is null)
             return TypedResults.BadRequest();
 
-        tagIds ??= [];
-        tagTypes ??= [];
-        sortOptions ??= [];
-        workIds ??= [];
-
         var results = db.WorkTags
             .Where(wt => wt.OwnerId == userId.Id);
 
-        if (tagTypes.Any())
-            results = results.Where(wt => tagIds.Contains(wt.Id));
+        if (queryDTO.TagIds.Any())
+            results = results.Where(wt => queryDTO.TagIds.Contains(wt.Id));
 
-        if (tagTypes.Any())
-            results = results.Where(wt => tagTypes.Contains(wt.TagType));
+        if (queryDTO.TagTypes.Any())
+            results = results.Where(wt => queryDTO.TagTypes.Contains(wt.TagType));
 
-        if (workIds.Any())
+        if (queryDTO.WorkIds.Any())
             results = results
                 .Include(wt => wt.WorkTagWorks)
                 .Where(wt =>
                         wt.WorkTagWorks.Any(
-                            wtw => workIds.Contains(wtw.WorkId)));
+                            wtw => queryDTO.WorkIds.Contains(wtw.WorkId)));
 
-        foreach (var sort in sortOptions.Distinct())
+        foreach (var sort in queryDTO.SortOptions.Distinct())
         {
             results = sort switch
             {
@@ -80,15 +70,15 @@ public static class TagEndpoints
         }
         var totalCount = await results.CountAsync();
 
-        if (page * pageSize >= totalCount)
+        if (queryDTO.Page * queryDTO.PageSize >= totalCount)
             return TypedResults.NotFound();
 
         return TypedResults.Ok(new PaginationResult<TagGetDTO>(
-                    await results.Skip(pageSize * (page - 1)).Take(pageSize).ProjectToDTO().ToArrayAsync(),
+                    await results.Skip(queryDTO.PageSize * (queryDTO.Page - 1)).Take(queryDTO.PageSize).ProjectToDTO().ToArrayAsync(),
                     totalCount,
-                    pageSize,
-                    page,
-(int)Math.Ceiling(totalCount / (double)pageSize)
+                    queryDTO.PageSize,
+                    queryDTO.Page,
+(int)Math.Ceiling(totalCount / (double)queryDTO.PageSize)
                     ));
 
     }
