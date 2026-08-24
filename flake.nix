@@ -39,6 +39,7 @@
                 dotnet
                 nodejs_22
                 reuse
+                just
               ];
 
               DOTNET_ROOT = "${dotnet}/share/dotnet";

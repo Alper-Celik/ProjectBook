@@ -37,23 +37,11 @@ jobs:
 
       - name: Run ReUse Lint
         background: true
-        run: reuse lint
+        run: just reuse
 
-      - name: Dotnet Lint
+      - name: Dotnet Ci
         background: true
         run: |
-          export DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION=1
-          export TERM=xterm-256color
-          printf "\033[44m=>    dotnet restore\n\033[0m"
-          dotnet restore --locked-mode
-
-          printf "\033[44m=>    dotnet format\n\033[0m"
-          dotnet format --verify-no-changes --verbosity diagnostic --no-restore
-
-          printf "\033[44m=>    dotnet build\n\033[0m"
-          dotnet build --no-restore
-
-          printf "\033[44m=>    dotnet test\n\033[0m"
-          dotnet test --no-restore
+          just dotnet-ci
 
       - wait-all:
