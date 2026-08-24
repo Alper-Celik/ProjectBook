@@ -24,7 +24,7 @@ public static class TagEndpoints
     {
         var tags = route.MapGroup("tags");
 
-        tags.MapGet("", GetTags);
+        tags.MapMethods("", [HttpMethod.Query.Method, HttpMethod.Get.Method], QueryTags);
     }
 
     [PermissionCheckAuthorize(UserPermissionBits.WorkTagRead | UserPermissionBits.WorkRead)]
@@ -32,7 +32,7 @@ public static class TagEndpoints
         Ok<PaginationResult<TagGetDTO>>,
         NotFound,
         BadRequest>>
-            GetTags(
+            QueryTags(
                     [FromServices] PGContext db,
                     [FromServices] ICurrentUserId userId,
 
