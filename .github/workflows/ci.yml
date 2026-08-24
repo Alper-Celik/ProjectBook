@@ -20,17 +20,6 @@ jobs:
         uses: actions/checkout@v6
 
       - uses: actions/cache@v6
-        id: nixcache
-        background: true
-        env:
-          ZSTD_CLEVEL: "1"
-        with:
-          path: ~/nix-vol
-          key: ${{ runner.os }}-nix-${{ hashFiles('**/flake.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-nix-${{ hashFiles('**/flake.lock') }}
-
-      - uses: actions/cache@v6
         background: true
         with:
           path: ~/.nuget/packages
@@ -38,43 +27,45 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - wait-all:
-
-      - name: prepare nix vol
-        shell: bash
-        run: |
-          if [ ! -f ~/nix-vol ]; then
-            fallocate -l 3G ~/nix-vol 
-            sudo mkfs.btrfs ~/nix-vol
-          fi;
-          sudo mount -o compress=zstd:4 -m $HOME/nix-vol /nix;
-
-      - name: clear nix vol
-        uses: gacts/run-and-post-run@v1.4.4
-        if: steps.nixcache.outputs.cache-hit != 'true'
+      - uses: nixbuild/nix-quick-install-action@v30
         with:
-          post-shell: bash
-          post: |
-            sudo systemctl stop nix-daemon.service nix-daemon.socket
-            sudo fuser -m /nix -v
-            sudo fuser -m /nix -v -k
-            sudo fuser -m /nix -v
-            sudo umount /nix
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
 
-      - name: InstallNix
-        uses: cachix/install-nix-action@v31
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v7
+        id: nixcache
         with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          # restore and save a cache using this key
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          # if there's no cache hit, restore a cache by this prefix
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          # collect garbage until the Nix store size (in bytes) is at most this number
+          # before trying to save a new cache
+          # 1G = 1073741824
+          gc-max-store-size-linux: 2G
+          # do purge caches
+          purge: true
+          # purge all versions of the cache
+          purge-prefixes: nix-${{ runner.os }}-
+          # created more than this number of seconds ago
+          purge-created: 0
+          # or last accessed this duration (ISO 8601 duration format)
+          # before the start of the `Post Restore and save Nix store` phase
+          purge-last-accessed: P1DT12H
+          # except any version with the key that is the same as the `primary-key`
+          purge-primary-key: never
 
-      - uses: cachix/cachix-action@v17
-        with:
-          name: projectbook
-          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-
+      # - uses: cachix/cachix-action@v17
+      #   with:
+      #     name: projectbook
+      #     authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+      #
       - wait-all:
 
       - name: Install Deps
-        if: steps.nixcache.outputs.cache-hit != 'true'
+        if: steps.nixcache.outputs.hit-primary-key != 'true'
         run: nix develop .#ci --command ls
 
       - name: Run ReUse Lint
