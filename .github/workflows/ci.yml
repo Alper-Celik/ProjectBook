@@ -18,7 +18,48 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - uses: actions/cache@v6
+        id: nixcache
         background: true
+        env:
+          ZSTD_CLEVEL: "1"
+        with:
+          path: ~/nix-vol
+          key: ${{ runner.os }}-nix-${{ hashFiles('**/flake.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-nix-${{ hashFiles('**/flake.lock') }}
+
+      - uses: actions/cache@v6
+        background: true
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - wait-all:
+
+      - name: prepare nix vol
+        shell: bash
+        run: |
+          if [ ! -f ~/nix-vol ]; then
+            fallocate -l 3G ~/nix-vol 
+            sudo mkfs.btrfs ~/nix-vol
+          fi;
+          sudo mount -o compress=zstd:4 -m $HOME/nix-vol /nix;
+
+      - name: clear nix vol
+        uses: gacts/run-and-post-run@v1.4.4
+        if: steps.nixcache.outputs.cache-hit != 'true'
+        with:
+          post-shell: bash
+          post: |
+            sudo systemctl stop nix-daemon.service nix-daemon.socket
+            sudo fuser -m /nix -v
+            sudo fuser -m /nix -v -k
+            sudo fuser -m /nix -v
+            sudo umount /nix
 
       - name: InstallNix
         uses: cachix/install-nix-action@v31
@@ -33,6 +74,7 @@ jobs:
       - wait-all:
 
       - name: Install Deps
+        if: steps.nixcache.outputs.cache-hit != 'true'
         run: nix develop .#ci --command ls
 
       - name: Run ReUse Lint
