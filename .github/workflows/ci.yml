@@ -11,7 +11,7 @@ on:
 
 jobs:
   ci:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     defaults:
       run:
         shell: nix develop .#ci --command bash --noprofile --norc -eo pipefail {0}
@@ -20,6 +20,7 @@ jobs:
         uses: actions/checkout@v6
 
       - uses: actions/cache@v6
+        id: nuget-cache
         background: true
         with:
           path: ~/.nuget/packages
@@ -62,19 +63,16 @@ jobs:
       #     name: projectbook
       #     authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       #
-      - wait-all:
+      - wait: nuget-cache
 
       - name: Install Deps
         if: steps.nixcache.outputs.hit-primary-key != 'true'
         run: nix develop .#ci --command ls
 
-      - name: Run ReUse Lint
-        background: true
-        run: just reuse-check
+      - parallel:
+          - name: Run ReUse Lint
+            run: just reuse-check
 
-      - name: Dotnet Ci
-        background: true
-        run: |
-          just ci-dotnet
-
-      - wait-all:
+          - name: Dotnet Ci
+            run: |
+              just ci-dotnet
