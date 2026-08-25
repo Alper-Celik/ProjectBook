@@ -9,6 +9,12 @@ on:
   - pull_request
   - workflow_dispatch
 
+env:
+  JUST_COLOR: always
+  JUST_COMMAND_COLOR: green
+  JUST_TIME: 1
+  JUST_HIGHLIGHT: 1
+
 jobs:
   ci:
     runs-on: ubuntu-24.04-arm
