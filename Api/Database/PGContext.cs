@@ -5,31 +5,42 @@
 using System.Reflection;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 using Npgsql;
 
 namespace Api.Database;
 
-public partial class PGContext(DbContextOptions options) : DbContext(options)
+public partial class PGContext(DbContextOptions options, IConfiguration? config = null) : DbContext(options)
 {
+    public string SchemaName { get; set; } = config?["Database:Schema"] ?? "public";
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
+        modelBuilder.HasDefaultSchema(SchemaName);
 
+        base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetAssembly(this.GetType()!)!);
     }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder
+        .ReplaceService<IModelCacheKeyFactory, SchemaModelCacheKeyFactory>()
         .UseSnakeCaseNamingConvention()
-        .UseValidationCheckConstraints();
+        .UseValidationCheckConstraints()
+        .UseNpgsql(
+                config?.GetConnectionString("PG") ?? ""
+                , nopts => nopts
+                .SetPostgresVersion(18, 0)
+                .UseNodaTime());
+}
 
-    public static void ConfigureDB(IServiceCollection services, string connectionString)
+public class SchemaModelCacheKeyFactory : IModelCacheKeyFactory
+{
+    public object Create(DbContext context, bool designTime)
     {
-        ArgumentNullException.ThrowIfNull(connectionString);
-        services.AddNpgsql<PGContext>(connectionString, (opt) =>
-        {
-            opt.SetPostgresVersion(18, 0);
-            opt.UseNodaTime();
-        });
+        return context is PGContext pgContext
+            ? (context.GetType(), pgContext.SchemaName, designTime)
+            : (context.GetType(), designTime);
     }
 }

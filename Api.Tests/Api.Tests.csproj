@@ -18,16 +18,9 @@ SPDX-License-Identifier: Apache-2.0
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="Xunit" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="11.0.0-preview.7.26381.103" />
-    <PackageReference Include="xunit.v3.mtp-v2" Version="4.0.0" />
+    <PackageReference Include="TUnit" Version="1.65.68" />
+    <PackageReference Include="TUnit.AspNetCore" Version="1.65.68" />
   </ItemGroup>
 
   <ItemGroup>

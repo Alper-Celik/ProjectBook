@@ -9,7 +9,7 @@ using NodaTime;
 
 namespace Api.Auth.Models;
 
-[Table("user_tokens", Schema = "auth")]
+[Table("user_tokens")]
 public class UserToken
 {
     public const string PermissionBitsType = "PermissionBitsType";

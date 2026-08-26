@@ -11,9 +11,13 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+
+using TUnit.AspNetCore;
+using TUnit.Core.Interfaces;
+
 namespace Api.Tests;
 
-public class MyWebApplicationFactory(string dbName) : WebApplicationFactory<Program>
+public class MyWebApplicationFactory(string dbName) : TestWebApplicationFactory<Program>
 {
     protected override void ConfigureWebApplicationBuilder(IHostApplicationBuilder hostApplicationBuilder)
     {
@@ -35,7 +39,7 @@ public class MyWebApplicationFactory(string dbName) : WebApplicationFactory<Prog
     }
 }
 
-public class TestInit : IAsyncLifetime
+public class TestInit : IAsyncInitializer, IAsyncDisposable
 {
     public WebApplicationFactory<Program> Factory { get; set; }
     public HttpClient Client { get; set; }
@@ -55,7 +59,7 @@ public class TestInit : IAsyncLifetime
 
     }
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
         Factory = new MyWebApplicationFactory(DbName);
         Client = Factory.CreateClient();

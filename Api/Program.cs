@@ -13,6 +13,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.EntityFrameworkCore.Storage;
 
 using Scalar.AspNetCore;
 
@@ -39,10 +40,8 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionCheckAuthorizatio
 builder.Services.AddAuthorizationBuilder().SetDefaultPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 
 
-PGContext.ConfigureDB(builder.Services, builder.Configuration.GetConnectionString("PG")!);
-
-Api.Auth.Setup.RegisterServices(builder.Services);
 Api.Database.Setup.RegisterServices(builder.Services);
+Api.Auth.Setup.RegisterServices(builder.Services);
 
 var app = builder.Build();
 

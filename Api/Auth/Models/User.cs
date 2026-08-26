@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Api.Auth.Models;
 
-[Table("users", Schema = "auth")]
+[Table("users")]
 [Index(nameof(Email), IsUnique = true)]
 public class User
 {

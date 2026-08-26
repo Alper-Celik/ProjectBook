@@ -11,5 +11,7 @@ public static class Setup
     public static void RegisterServices(IServiceCollection services)
     {
         services.AddScoped<IEFTransactionDIAccessorService, EFTransactionDIAccessorService>();
+        services.AddDbContext<PGContext>();
+
     }
 }

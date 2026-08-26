@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Api.Works.Models;
 
-[Table("work_tags", Schema = "main")]
+[Table("work_tags")]
 [Index(nameof(OwnerId), nameof(TagName), IsUnique = true)]
 public class WorkTag : IEntityMetadata
 {
@@ -36,7 +36,7 @@ public class WorkTag : IEntityMetadata
 }
 
 
-[Table("work_tag___tag", Schema = "main")]
+[Table("work_tag___tag")]
 [PrimaryKey(nameof(WorkId), nameof(WorkTagId))]
 public class WorkTag_Work
 {

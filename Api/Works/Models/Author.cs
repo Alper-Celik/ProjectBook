@@ -12,7 +12,7 @@ using Riok.Mapperly.Abstractions;
 
 namespace Api.Works.Models;
 
-[Table("authors", Schema = "main")]
+[Table("authors")]
 public class Author : IEntityMetadata
 {
     [Key]
@@ -34,7 +34,7 @@ public class Author : IEntityMetadata
     public List<Work> Works { get; set; } = [];
 }
 
-[Table("work___author", Schema = "main")]
+[Table("work___author")]
 [PrimaryKey(nameof(WorkId), nameof(AuthorId))]
 public class Work_Author
 {

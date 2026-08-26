@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 // SPDX-FileCopyrightText: 2026 Alper Çelik <alper@alper-celik.dev>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -6,18 +7,17 @@ namespace Api.Tests;
 
 public class AuthTests : TestInit
 {
-    [Fact]
-    public async Task OnlyFirstAccountCanBeAdmin()
+    [Test]
+    public async Task OnlyFirstAccountCanBeAdmin(CancellationToken ct)
     {
         var registerInfo_1 = await (await
                 Client.GetAsync(
                     "api/auth/register_info",
-                    TestContext.Current.CancellationToken))
+                    ct))
             .EnsureSuccessStatusCode()
-            .Content.ReadFromJsonAsync<Auth.Endpoints.RegisterEndpoints.RegisterInfo>(cancellationToken: TestContext.Current.CancellationToken);
+            .Content.ReadFromJsonAsync<Auth.Endpoints.RegisterEndpoints.RegisterInfo>(cancellationToken: ct);
 
-        Assert.NotNull(registerInfo_1);
-        Assert.True(registerInfo_1.CanRegisterAsAdmin);
-
+        await Assert.That(registerInfo_1).IsNotNull();
+        await Assert.That(registerInfo_1.CanRegisterAsAdmin).IsTrue();
     }
 }
