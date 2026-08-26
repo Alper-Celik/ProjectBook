@@ -12,8 +12,8 @@ on:
 env:
   JUST_COLOR: always
   JUST_COMMAND_COLOR: green
-  JUST_TIME: 1
-  JUST_HIGHLIGHT: 1
+  JUST_TIME: true
+  JUST_HIGHLIGHT: true
 
 jobs:
   ci:
@@ -71,14 +71,28 @@ jobs:
       #
       - wait: nuget-cache
 
+      - name: Run Services
+        id: services
+        background: true
+        run: nix run .#ci-services -- up --tui=false
+
       - name: Install Deps
         if: steps.nixcache.outputs.hit-primary-key != 'true'
         run: nix develop .#ci --command ls
 
-      - parallel:
-          - name: Run ReUse Lint
-            run: just reuse-check
+      - name: Run ReUse Lint
+        background: true
+        run: just lint-reuse
 
-          - name: Dotnet Ci
-            run: |
-              just ci-dotnet
+      - name: Run Dotnet lints
+        id: lint-dotnet
+        background: true
+        run: |
+          just lint-dotnet
+
+      - wait: lint-dotnet
+      - name: dotnet tests
+        run: just dotnet-test
+
+      - cancel: services
+      - wait-all:

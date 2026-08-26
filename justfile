@@ -5,12 +5,15 @@
 
 color-cmd := "44m"
 
-lint: dotnet-restore dotnet-format-check reuse-check
+lint: dotnet-restore dotnet-format-check lint-reuse
 
 
 
-reuse-check:
+lint-reuse:
   reuse lint
+
+up:
+  nix run .#dev-services -- up
 
 dotnet-restore:
   dotnet restore --locked-mode
@@ -27,6 +30,6 @@ dotnet-format:
 dotnet-test:
   dotnet test --no-restore
 
-ci-dotnet: dotnet-restore dotnet-format-check dotnet-build dotnet-test
+lint-dotnet: dotnet-restore dotnet-format-check dotnet-build
 
-ci-all: reuse-check ci-dotnet
+ci-all: lint-reuse lint-dotnet dotnet-test

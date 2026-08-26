@@ -7,12 +7,15 @@
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    process-compose-flake.url = "github:Platonic-Systems/process-compose-flake";
+    services-flake.url = "github:juspay/services-flake";
   };
 
   outputs =
     inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
+        inputs.process-compose-flake.flakeModule
       ];
       systems = [
         "x86_64-linux"
@@ -35,6 +38,9 @@
               dotnet = pkgs.dotnetCorePackages.sdk_11_0;
             in
             pkgs.mkShell {
+              inputsFrom = [
+                config.process-compose."dev-services".services.outputs.devShell
+              ];
               packages = with pkgs; [
                 dotnet
                 nodejs_22
@@ -46,6 +52,49 @@
               DOTNET_PATH = "${dotnet}/bin/dotnet";
             };
           devShells.ci = config.devShells.default;
+
+          process-compose =
+            let
+              common = {
+                imports = [
+                  inputs.services-flake.processComposeModules.default
+                ];
+
+                cli.options = {
+                  no-server = false;
+                };
+
+                services.postgres."pg1" = {
+                  package = pkgs.postgresql_18;
+                  superuser = "postgres";
+                  extensions = exts: [
+                    exts.system_stats
+                  ];
+                  initialScript.before = ''
+                    CREATE EXTENSION system_stats;
+                  '';
+                  enable = true;
+                };
+
+              };
+            in
+            {
+              "ci-services" = {
+                imports = [ common ];
+              };
+              "dev-services" = {
+                imports = [ common ];
+                services.pgadmin."pgad1" = {
+                  enable = true;
+                  initialEmail = "email@example.com";
+                  initialPassword = "123";
+                  extraConfig = {
+                    SERVER_MODE = false;
+                    CONFIG_DATABASE_URI = "postgresql://postgres@localhost";
+                  };
+                };
+              };
+            };
         };
     };
 }

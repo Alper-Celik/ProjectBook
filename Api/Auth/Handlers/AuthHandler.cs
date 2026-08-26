@@ -21,13 +21,13 @@ class AuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerF
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        string?[] tokenHashes = [Context.Request.Headers.Authorization.Last(), Context.Request.Cookies[LoginUtils.TokenCookieName]];
+        string?[] tokenHashes = [Context.Request.Headers.Authorization.LastOrDefault(), Context.Request.Cookies[LoginUtils.TokenCookieName]];
         List<byte[]> userTokenHashes = [.. tokenHashes
             .Where(s => s != null && s.StartsWith(LoginUtils.UserTokenPrefix))
         .Select(s => Base64Url.DecodeFromChars(
                     s.AsSpan()[(LoginUtils.UserTokenPrefix.Length - 1)..]))];
 
-        var userToken = await db.UserTokens.Where(ut => userTokenHashes.Contains(ut.TokenHash)).FirstAsync();
+        var userToken = await db.UserTokens.Where(ut => userTokenHashes.Contains(ut.TokenHash)).FirstOrDefaultAsync();
 
         if (userToken is not null)
         {

@@ -36,7 +36,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddAuthentication()
     .AddScheme<AuthenticationSchemeOptions, AuthHandler>("x_user", null);
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionCheckAuthorizationHandler>();
-builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+builder.Services.AddAuthorizationBuilder().SetDefaultPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 
 
 PGContext.ConfigureDB(builder.Services, builder.Configuration.GetConnectionString("PG")!);

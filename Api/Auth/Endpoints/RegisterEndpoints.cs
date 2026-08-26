@@ -13,6 +13,7 @@ using FluentValidation;
 
 using Geralt;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -39,10 +40,12 @@ public static class RegisterEndpoints
         return true;
     }
 
+    [AllowAnonymous]
     private static async Task<Results<
         Ok<string>,
         Conflict
-        >> PostRegister(
+        >>
+        PostRegister(
             [FromServices] PGContext db,
             [FromHeader(Name = "user-agent")] string userAgent,
             [FromBody] RegisterDTO dto
@@ -74,6 +77,7 @@ public static class RegisterEndpoints
         }
     }
 
+    [AllowAnonymous]
     private static async Task<Ok<RegisterInfo>> GetRegisterInfo() => TypedResults.Ok(new RegisterInfo(
          CanRegisterAsAdmin: await CanAdminRegister()
         ));
