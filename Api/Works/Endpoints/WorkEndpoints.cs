@@ -8,6 +8,7 @@ using Api.Auth.Utils;
 using Api.Database;
 using Api.Database.Utils;
 using Api.Works.DTOs;
+using Api.Works.Query;
 
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -140,7 +141,8 @@ public static class WorkEndpoints
          BadRequest>>
     GetWorks(
             [FromServices] PGContext db,
-            [FromServices] CurrentUserId userId
+            [FromServices] CurrentUserId userId,
+            [FromBody] WorkSelector query
             )
     {
         if (userId.Id is null)

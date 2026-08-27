@@ -17,6 +17,11 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 
+using NodaTime;
+using NodaTime.Serialization.SystemTextJson;
+
+using OpenApi.NodaTime.Extensions;
+
 using Scalar.AspNetCore;
 
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
@@ -29,9 +34,12 @@ builder.Services.Configure<JsonOptions>(options =>
         JsonIgnoreCondition.WhenWritingNull;
     options.SerializerOptions.PropertyNamingPolicy =
         JsonNamingPolicy.CamelCase;
+    options.SerializerOptions.InferClosedTypePolymorphism = true;
+    options.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
 });
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(o =>
+        o.ConfigureNodaTime(DateTimeZoneProviders.Tzdb));
 
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterEndpoints.RegisterDTO>();
 builder.Services.AddFluentValidationAutoValidation();

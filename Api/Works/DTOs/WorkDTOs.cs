@@ -22,8 +22,8 @@ public record WorkUpdateDTO(
         string Title,
         string? Description,
 
-        NodaTime.ZonedDateTime? WorkPublishedAt,
-        NodaTime.ZonedDateTime? WorkUpdatedAt,
+        NodaTime.Instant? WorkPublishedAt,
+        NodaTime.Instant? WorkUpdatedAt,
 
         Guid[] TagIds,
         Guid[] AuthorIds,
@@ -134,8 +134,8 @@ public record WorkGetDTO(
         string Title,
         string? Description,
 
-        NodaTime.ZonedDateTime? WorkPublishedAt,
-        NodaTime.ZonedDateTime? WorkUpdatedAt,
+        NodaTime.Instant? WorkPublishedAt,
+        NodaTime.Instant? WorkUpdatedAt,
 
         TagGetDTO[] Tags,
         AuthorGetDTO[] Authors,
@@ -156,8 +156,8 @@ public record WorkAddDTO(
         string Title,
         string? Description,
 
-        NodaTime.ZonedDateTime? WorkPublishedAt,
-        NodaTime.ZonedDateTime? WorkUpdatedAt,
+        NodaTime.Instant? WorkPublishedAt,
+        NodaTime.Instant? WorkUpdatedAt,
 
         Guid[] TagIds,
         Guid[] AuthorIds,
