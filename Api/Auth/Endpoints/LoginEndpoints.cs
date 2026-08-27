@@ -33,10 +33,11 @@ public static class LoginEndpoints
     >> Login(
             HttpContext ctx,
             [FromServices] PGContext db,
-            [FromHeader(Name = "user-agent")] string userAgent,
+            [FromHeader(Name = "user-agent")] string? userAgent,
             [FromBody] LoginDTO loginDTO
             )
     {
+        userAgent ??= "unknown";
         Guid? userId = null;
         string hash = string.Empty;
 
