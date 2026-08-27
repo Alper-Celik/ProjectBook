@@ -11,6 +11,7 @@ using FluentValidation;
 
 using Geralt;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,12 +25,13 @@ public static class LoginEndpoints
         route.MapPost("login", Login);
     }
 
+    [AllowAnonymous]
     public static async Task<
     Results<
         Ok<LoginUtils.LoginResultDTO>,
         ForbidHttpResult
     >> Login(
-            [FromServices] HttpContext ctx,
+            HttpContext ctx,
             [FromServices] PGContext db,
             [FromHeader(Name = "user-agent")] string userAgent,
             [FromBody] LoginDTO loginDTO

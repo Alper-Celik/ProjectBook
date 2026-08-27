@@ -5,6 +5,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using Api.Auth.Endpoints;
 using Api.Auth.Handlers;
 using Api.Database;
 
@@ -32,7 +33,7 @@ builder.Services.Configure<JsonOptions>(options =>
 
 builder.Services.AddOpenApi();
 
-builder.Services.AddValidatorsFromAssemblyContaining<PGContext>();
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterEndpoints.RegisterDTO>();
 builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddAuthentication()
@@ -52,8 +53,16 @@ app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi().RequireAuthorization();
+    app.MapOpenApi();
     app.MapScalarApiReference();
+
+    if (!app.Configuration.GetSection("IsTest").Get<bool>())
+    {
+        await using var scope = app.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetService<PGContext>()!;
+        await db.Database.EnsureDeletedAsync();
+        await db.Database.EnsureCreatedAsync();
+    }
 }
 
 if (app.Configuration.GetSection("IsTest").Get<bool>())
