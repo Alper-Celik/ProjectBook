@@ -24,6 +24,7 @@ public class User
 
     public bool EmailVerified { get; set; } = false;
 
+    [Column(TypeName = "bytea")]
     public required string PasswordHash { get; set; }
 
     public bool Admin { get; set; } = false;

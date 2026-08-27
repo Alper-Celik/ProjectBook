@@ -66,7 +66,7 @@ public static class RegisterEndpoints
         var password_bytes = Encoding.UTF8.GetBytes(dto.Password.Normalize());
         var hash_chars = new char[Argon2id.HashSize];
         Argon2id.ComputeHash(hash_chars, password_bytes, ARGON2ID_ITER, ARGON2ID_MEM_BYTES);
-        string hash = hash_chars.ToString()!;
+        string hash = new(hash_chars);
 
         var user = new User()
         {
