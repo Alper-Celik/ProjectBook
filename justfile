@@ -17,6 +17,7 @@ up:
 
 dotnet-restore:
   dotnet restore --locked-mode
+  dotnet tool restore
 
 dotnet-build: dotnet-restore
   dotnet build --no-restore
@@ -28,7 +29,13 @@ dotnet-format:
   dotnet format --verbosity diagnostic --no-restore
 
 dotnet-test:
+  rm -rf TestResults
   dotnet test --no-restore -- --coverage --coverage-output-format cobertura --github-reporter-style full
+  dotnet reportgenerator \
+    "-reports:TestResults/*.cobertura.xml" \
+    -targetdir:TestResults \
+    "-reporttypes:Html;Badges" \
+    -classfilters:+Api.\*
 
 lint-dotnet: dotnet-restore dotnet-format-check dotnet-build
 

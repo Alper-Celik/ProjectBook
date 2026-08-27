@@ -46,6 +46,7 @@
                 nodejs_22
                 reuse
                 just
+                wrangler
               ];
 
               DOTNET_ROOT = "${dotnet}/share/dotnet";

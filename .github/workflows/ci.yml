@@ -101,11 +101,40 @@ jobs:
 
       - name: Upload merged report
         if: always()
+        background: true
         uses: actions/upload-artifact@v7
         with:
           name: merged-test-report
           path: ${{ runner.temp }}/tunit-aggregate/**/merged-report.html
           archive: false
+
+      - name: wrangler
+        uses: cloudflare/wrangler-action@v3
+        id: codecov
+        background: true
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: |
+            pages deploy --project-name projectreading-dev --branch ${{ github.sha }} ./TestResults/
+
+      - name: wrangler main
+        uses: cloudflare/wrangler-action@v3
+        background: true
+        if: github.ref_name == 'main'
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: |
+            pages deploy --project-name projectreading-dev --branch main ./TestResults/
+
+      - wait: codecov
+
+      - run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+            #### See code test results at https://$(echo $GITHUB_SHA | head -c 28).projectreading-dev.pages.dev/$(basename $(find -name "*report.html"))
+            #### See code coverage outputs at https://$(echo $GITHUB_SHA | head -c 28).projectreading-dev.pages.dev
+          EOF
 
       - cancel: services
       - wait-all:
