@@ -20,6 +20,8 @@ using Microsoft.EntityFrameworkCore;
 
 using Npgsql;
 
+using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
+
 namespace Api.Auth.Endpoints;
 
 public static class RegisterEndpoints
@@ -28,29 +30,39 @@ public static class RegisterEndpoints
     // see https://www.rfc-editor.org/rfc/rfc9106.html#name-recommendations
     const int ARGON2ID_ITER = 3;
     const int ARGON2ID_MEM_BYTES = 64 * 1024 * 1024;
+    static bool _adminCreated = false;
 
     public static void Map(IEndpointRouteBuilder route)
     {
-        route.MapPost("register", PostRegister);
+        route.MapPost("register", PostRegister).AddFluentValidationAutoValidation();
         route.MapGet("register_info", GetRegisterInfo);
     }
 
-    private static async Task<bool> CanAdminRegister()
+    private static async Task<bool> CanAdminRegister(PGContext db)
     {
-        return true;
+        if (_adminCreated)
+        {
+            return false;
+        }
+
+        _adminCreated = db.Users.Any(u => u.Admin == true);
+        return !_adminCreated;
     }
 
     [AllowAnonymous]
     private static async Task<Results<
-        Ok<string>,
-        Conflict
+        Ok<LoginUtils.LoginResultDTO>,
+        Conflict,
+        BadRequest
         >>
         PostRegister(
+            HttpContext ctx,
             [FromServices] PGContext db,
-            [FromHeader(Name = "user-agent")] string userAgent,
+            [FromHeader(Name = "user-agent")] string? userAgent,
             [FromBody] RegisterDTO dto
             )
     {
+        userAgent ??= "unknown";
         var password_bytes = Encoding.UTF8.GetBytes(dto.Password.Normalize());
         var hash_chars = new char[Argon2id.HashSize];
         Argon2id.ComputeHash(hash_chars, password_bytes, ARGON2ID_ITER, ARGON2ID_MEM_BYTES);
@@ -61,6 +73,7 @@ public static class RegisterEndpoints
             Id = Guid.CreateVersion7(),
             Email = dto.Email,
             PasswordHash = hash,
+            Admin = (await CanAdminRegister(db)) && dto.AdminRegistration
         };
 
         try
@@ -68,7 +81,7 @@ public static class RegisterEndpoints
             await db.Users.AddAsync(user);
             string token = await LoginUtils.CreateUserSession(user.Id, userAgent, db);
             await db.SaveChangesAsync();
-            return TypedResults.Ok(token);
+            return LoginUtils.LogUserIn(ctx, token);
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx &&
                                             pgEx.SqlState == PostgresErrorCodes.UniqueViolation)
@@ -78,8 +91,8 @@ public static class RegisterEndpoints
     }
 
     [AllowAnonymous]
-    private static async Task<Ok<RegisterInfo>> GetRegisterInfo() => TypedResults.Ok(new RegisterInfo(
-         CanRegisterAsAdmin: await CanAdminRegister()
+    private static async Task<Ok<RegisterInfo>> GetRegisterInfo([FromServices] PGContext db) => TypedResults.Ok(new RegisterInfo(
+         CanRegisterAsAdmin: await CanAdminRegister(db)
         ));
 
 
@@ -92,9 +105,9 @@ public static class RegisterEndpoints
         public required bool AdminRegistration { get; set; }
     }
 
-    private class RegisterDTOValidator : AbstractValidator<RegisterDTO>
+    public class RegisterDTOValidator : AbstractValidator<RegisterDTO>
     {
-        public RegisterDTOValidator(PGContext ctx)
+        public RegisterDTOValidator(PGContext db)
         {
             RuleFor(r => r.Email)
                 .Must(e => new EmailAddressAttribute().IsValid(e))
@@ -102,13 +115,13 @@ public static class RegisterEndpoints
 
             RuleFor(r => r.Email)
                 .MustAsync(async (e, ct) =>
-                        !await ctx.Users
+                        !await db.Users
                         .Where(u => u.Email == e)
                         .AnyAsync(ct))
                 .WithMessage("Email is already used");
 
 
-            RuleFor(r => r.AdminRegistration).MustAsync(async (adr, ct) => !adr || await CanAdminRegister()).WithMessage("Can't Register As Admin");
+            RuleFor(r => r.AdminRegistration).MustAsync(async (adr, ct) => !adr || await CanAdminRegister(db)).WithMessage("Can't Register As Admin");
 
         }
     }
