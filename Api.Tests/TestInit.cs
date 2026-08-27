@@ -49,7 +49,7 @@ public abstract class TestInit : WebApplicationTest<MyWebApplicationFactory, Pro
         config.AddJsonStream(strStream);
     }
 
-    [ClassDataSource<DBData>]
+    [ClassDataSource<DBData>(Shared = SharedType.PerTestSession)]
     public required DBData DBInfo { get; init; }
 
     public record DBData : IAsyncInitializer, IAsyncDisposable
