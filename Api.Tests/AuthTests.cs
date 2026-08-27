@@ -10,8 +10,10 @@ public class AuthTests : TestInit
     [Test]
     public async Task OnlyFirstAccountCanBeAdmin(CancellationToken ct)
     {
+        var client = Factory.CreateClient();
+
         var registerInfo_1 = await (await
-                Client.GetAsync(
+                client.GetAsync(
                     "api/auth/register_info",
                     ct))
             .EnsureSuccessStatusCode()

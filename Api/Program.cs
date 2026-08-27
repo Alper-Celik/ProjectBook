@@ -13,6 +13,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 
 using Scalar.AspNetCore;
@@ -55,6 +56,16 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+if (app.Configuration.GetSection("IsTest").Get<bool>())
+{
+    {
+        await using var scope = app.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetService<PGContext>()!;
+        RelationalDatabaseCreator databaseCreator =
+            (RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>();
+        await databaseCreator.CreateTablesAsync();
+    }
+}
 
 app.UseStaticFiles();
 app.MapFallbackToFile("index.html");

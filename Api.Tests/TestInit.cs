@@ -11,39 +11,68 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Configuration;
 
 using TUnit.AspNetCore;
 using TUnit.Core.Interfaces;
 
 namespace Api.Tests;
 
-public class MyWebApplicationFactory(string dbName) : TestWebApplicationFactory<Program>
+public class MyWebApplicationFactory : TestWebApplicationFactory<Program>
 {
+
     protected override void ConfigureWebApplicationBuilder(IHostApplicationBuilder hostApplicationBuilder)
     {
         base.ConfigureWebApplicationBuilder(hostApplicationBuilder);
 
-        Stream strStream = new MemoryStream(
-        Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new
-        {
-
-            ConnectionStrings = new
-            {
-                PG = new Npgsql.NpgsqlConnectionStringBuilder(hostApplicationBuilder.Configuration.GetConnectionString("PG"))
-                {
-                    Database = dbName,
-                }.ConnectionString
-            }
-        })));
-        hostApplicationBuilder.Configuration.AddJsonStream(strStream);
     }
 }
 
-public class TestInit : IAsyncInitializer, IAsyncDisposable
+public abstract class TestInit : WebApplicationTest<MyWebApplicationFactory, Program>
 {
-    public WebApplicationFactory<Program> Factory { get; set; }
-    public HttpClient Client { get; set; }
-    public string DbName { get; init; } = $"___ProjectBookTests___{Guid.CreateVersion7()}";
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+    {
+        Stream strStream = new MemoryStream(
+                Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new
+                {
+                    IsTest = true,
+                    ConnectionStrings = new
+                    {
+                        PGSchema = GetIsolatedName("test_schema"),
+                        PG = new Npgsql.NpgsqlConnectionStringBuilder(config.Build().GetConnectionString("PG"))
+                        {
+                            Database = DBInfo.Name,
+                        }.ConnectionString
+                    }
+                }
+                )));
+        config.AddJsonStream(strStream);
+    }
+
+    [ClassDataSource<DBData>]
+    public required DBData DBInfo { get; init; }
+
+    public record DBData : IAsyncInitializer, IAsyncDisposable
+    {
+        public string Name { get; init; } = $"test_db";
+        readonly Npgsql.NpgsqlDataSource _npgsqlDataSource = new Npgsql.NpgsqlDataSourceBuilder($"Host=localhost;Username=postgres").Build();
+
+        public async ValueTask DisposeAsync()
+        {
+            GC.SuppressFinalize(this);
+            await _npgsqlDataSource.DisposeAsync();
+        }
+
+        public async Task InitializeAsync()
+        {
+            await using (var cmd_drop = _npgsqlDataSource.CreateCommand($"DROP DATABASE IF EXISTS \"{Name}\""))
+            {
+                await cmd_drop.ExecuteNonQueryAsync();
+            }
+            await using var cmd = _npgsqlDataSource.CreateCommand($"CREATE DATABASE \"{Name}\"");
+            await cmd.ExecuteScalarAsync();
+        }
+    }
 
     public async ValueTask DisposeAsync()
     {
@@ -59,14 +88,4 @@ public class TestInit : IAsyncInitializer, IAsyncDisposable
 
     }
 
-    public async Task InitializeAsync()
-    {
-        Factory = new MyWebApplicationFactory(DbName);
-        Client = Factory.CreateClient();
-        {
-            await using var scope = Factory.Services.CreateAsyncScope();
-            await using var dbConn = scope.ServiceProvider.GetService<PGContext>()!;
-            await dbConn.Database.EnsureCreatedAsync();
-        }
-    }
 }

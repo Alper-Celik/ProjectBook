@@ -13,7 +13,7 @@ namespace Api.Database;
 
 public partial class PGContext(DbContextOptions options, IConfiguration? config = null) : DbContext(options)
 {
-    public string SchemaName { get; set; } = config?["Database:Schema"] ?? "public";
+    public string SchemaName { get; set; } = config?["ConnectionStrings:PGSchema"] ?? "public";
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
