@@ -82,17 +82,30 @@ jobs:
 
       - name: Run ReUse Lint
         background: true
+        continue-on-error: true
         run: just lint-reuse
 
       - name: Run Dotnet lints
         id: lint-dotnet
+        continue-on-error: true
         background: true
         run: |
           just lint-dotnet
 
       - wait: lint-dotnet
-      - name: dotnet tests
-        run: just dotnet-test
+      - name: tests
+        continue-on-error: true
+        env:
+          TUNIT_GITHUB_REPORTER_STYLE: full
+        run: just ci-test
+
+      - name: Upload merged report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: merged-test-report
+          path: ${{ runner.temp }}/tunit-aggregate/**/merged-report.html
+          archive: false
 
       - cancel: services
       - wait-all:

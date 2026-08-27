@@ -28,8 +28,10 @@ dotnet-format:
   dotnet format --verbosity diagnostic --no-restore
 
 dotnet-test:
-  dotnet test --no-restore
+  dotnet test --no-restore -- --coverage --coverage-output-format cobertura --github-reporter-style full
 
 lint-dotnet: dotnet-restore dotnet-format-check dotnet-build
 
 ci-all: lint-reuse lint-dotnet dotnet-test
+
+ci-test: dotnet-test
