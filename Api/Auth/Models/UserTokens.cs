@@ -10,11 +10,11 @@ using NodaTime;
 namespace Api.Auth.Models;
 
 [Table("user_tokens")]
-public class UserToken
+public class UserTokenEF
 {
     public const string PermissionBitsType = "PermissionBitsType";
 
-    [ForeignKey(nameof(User))]
+    [ForeignKey(nameof(UserEF))]
     public Guid UserId { get; set; }
 
     [Key]

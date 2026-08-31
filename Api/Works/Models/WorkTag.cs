@@ -31,7 +31,7 @@ public class WorkTag : IEntityMetadata
     // Navigation Properties
     public List<WorkTag_Work> WorkTagWorks { get; set; } = null!;
     public List<Work> Works { get; set; } = null!;
-    public User Owner { get; set; } = null!;
+    public UserEF Owner { get; set; } = null!;
 
 }
 

@@ -22,6 +22,8 @@ using Npgsql;
 
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
+using static Api.Auth.Utils.LoginUtils;
+
 namespace Api.Auth.Endpoints;
 
 public static class RegisterEndpoints
@@ -30,7 +32,6 @@ public static class RegisterEndpoints
     // see https://www.rfc-editor.org/rfc/rfc9106.html#name-recommendations
     const int ARGON2ID_ITER = 3;
     const int ARGON2ID_MEM_BYTES = 64 * 1024 * 1024;
-    static bool _adminCreated = false;
 
     public static void Map(IEndpointRouteBuilder route)
     {
@@ -38,37 +39,26 @@ public static class RegisterEndpoints
         route.MapGet("register_info", GetRegisterInfo);
     }
 
-    private static async Task<bool> CanAdminRegister(PGContext db)
-    {
-        if (_adminCreated)
-        {
-            return false;
-        }
-
-        _adminCreated = db.Users.Any(u => u.Admin == true);
-        return !_adminCreated;
-    }
-
     [AllowAnonymous]
     private static async Task<Results<
-        Ok<LoginUtils.LoginResultDTO>,
-        Conflict,
-        BadRequest
-        >>
-        PostRegister(
-            HttpContext ctx,
-            [FromServices] PGContext db,
-            [FromHeader(Name = "user-agent")] string? userAgent,
-            [FromBody] RegisterDTO dto
-            )
+     Ok<LoginUtils.LoginResultDTO>,
+     Conflict,
+     BadRequest
+     >>
+     PostRegister(
+         HttpContext ctx,
+         [FromServices] PGContext db,
+         [FromHeader(Name = "user-agent")] string? userAgent,
+         [FromBody] RegisterDTO dto
+         )
     {
         userAgent ??= "unknown";
         var password_bytes = Encoding.UTF8.GetBytes(dto.Password.Normalize());
         var hash_chars = new char[Argon2id.HashSize];
         Argon2id.ComputeHash(hash_chars, password_bytes, ARGON2ID_ITER, ARGON2ID_MEM_BYTES);
-        string hash = new(hash_chars);
+        string hash = new([.. hash_chars.Where(c => c != (char)byte.MinValue)]);
 
-        var user = new User()
+        var user = new UserEF()
         {
             Id = Guid.CreateVersion7(),
             Email = dto.Email,

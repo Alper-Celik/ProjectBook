@@ -12,7 +12,7 @@ namespace Api.Auth.Models;
 
 [Table("users")]
 [Index(nameof(Email), IsUnique = true)]
-public class User
+public class UserEF
 {
     public const string UserHandleAcceptedRegex = @"^[a-zA-Z0-9_\-]{3,30}$";
 
@@ -24,15 +24,14 @@ public class User
 
     public bool EmailVerified { get; set; } = false;
 
-    [Column(TypeName = "bytea")]
     public required string PasswordHash { get; set; }
 
     public bool Admin { get; set; } = false;
 }
 
-public class UserEntityTypeConfiguration : IEntityTypeConfiguration<User>
+public class UserEntityTypeConfiguration : IEntityTypeConfiguration<UserEF>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public void Configure(EntityTypeBuilder<UserEF> builder)
     {
     }
 }

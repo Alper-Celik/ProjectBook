@@ -36,7 +36,7 @@ class AuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerF
 
             Claim[] claims = [
                 new Claim(ClaimTypes.NameIdentifier,userToken.UserId.ToString()),
-                new Claim(UserToken.PermissionBitsType,((long)userToken.Permissions).ToString()),
+                new Claim(UserTokenEF.PermissionBitsType,((long)userToken.Permissions).ToString()),
             ];
 
             return AuthenticateResult.Success(

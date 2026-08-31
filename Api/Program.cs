@@ -32,6 +32,10 @@ builder.Services.Configure<JsonOptions>(options =>
 });
 
 builder.Services.AddOpenApi();
+builder.Services.AddGraphQL()
+    .AddAuthorization()
+    .AddMutationConventions(applyToAllMutations: true)
+    .AddFairyBread(configureOptions: (opt) => opt.IncludeAttemptedValueInErrors = builder.Environment.IsDevelopment());
 
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterEndpoints.RegisterDTO>();
 builder.Services.AddFluentValidationAutoValidation();
@@ -78,6 +82,7 @@ if (app.Configuration.GetSection("IsTest").Get<bool>())
 
 app.UseStaticFiles();
 app.MapFallbackToFile("index.html");
+app.MapGraphQL();
 
 var api = app.MapGroup("/api").AddFluentValidationAutoValidation();
 
@@ -87,4 +92,4 @@ Api.Auth.Setup.MapEndpoints(auth);
 var works = api.MapGroup("works");
 Api.Works.Setup.MapEndpoints(works);
 
-app.Run();
+app.RunWithGraphQLCommands(args);
