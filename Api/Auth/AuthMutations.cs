@@ -21,9 +21,28 @@ namespace Api.Auth;
 [MutationType]
 public static partial class AuthMutations
 {
+
     [AllowAnonymous]
-    [Authorize]
-    public static async Task<RegisterPayload> RegisterMutation([Service] PGContext db, RegisterInput input)
+    public static async Task<LoginPayload> LoginMutation([Service] PGContext db, LoginInput input)
+    {
+        UserEF? user = await db.Users.Where(u => u.Email == input.Email)
+           .FirstOrDefaultAsync();
+
+        if (user is not null &&
+                Argon2id.VerifyHash(user.PasswordHash, Encoding.UTF8.GetBytes(input.Password.Normalize())))
+        {
+            var token = await LoginUtils.CreateUserSession(user.Id, input.ClientName, db);
+            return new(UserMapper.ToDto(user), token);
+        }
+
+        throw new GraphQLException(ErrorBuilder.New()
+                .SetMessage("Invalid Credantials")
+                .SetCode(ErrorCodes.INVALID_CREDS)
+                .Build());
+    }
+
+    [AllowAnonymous]
+    public static async Task<LoginPayload> RegisterMutation([Service] PGContext db, RegisterInput input)
     {
         var password_bytes = Encoding.UTF8.GetBytes(input.Password.Normalize());
         var hash_chars = new char[Argon2id.HashSize];
@@ -42,9 +61,10 @@ public static partial class AuthMutations
         string token = await LoginUtils.CreateUserSession(user.Id, input.ClientName, db);
         await db.SaveChangesAsync();
 
-        return new RegisterPayload(UserMapper.ToDto(user), token, []);
+        return new(UserMapper.ToDto(user), token);
     }
 }
+
 public static class AuthMutationsUtils
 {
 
@@ -52,16 +72,22 @@ public static class AuthMutationsUtils
     public const int ARGON2ID_ITER = 3;
     public const int ARGON2ID_MEM_BYTES = 64 * 1024 * 1024;
 
+
+    public record LoginPayload(
+            User User,
+            string Token
+            );
+    public record LoginInput(
+            string Email,
+            string Password,
+            string ClientName = "unknown"
+            );
+
     public record RegisterInput(
             string Email,
             string Password,
             bool AdminRegistration,
             string ClientName = "unknown"
-            );
-    public record RegisterPayload(
-            User User,
-            string Token,
-            IError[] Errors
             );
     public class RegisterInputValidator : AbstractValidator<RegisterInput>, IRequiresOwnScopeValidator
     {

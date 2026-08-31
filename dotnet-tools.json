@@ -15,6 +15,13 @@
         "reportgenerator"
       ],
       "rollForward": false
+    },
+    "zeroql.cli": {
+      "version": "8.0.0",
+      "commands": [
+        "zeroql"
+      ],
+      "rollForward": false
     }
   }
 }

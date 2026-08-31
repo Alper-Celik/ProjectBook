@@ -6,17 +6,19 @@ using Api.Auth.Models;
 
 using Riok.Mapperly.Abstractions;
 
-using System.Runtime.Serialization;
+using HotChocolate.Authorization;
 
 namespace Api.Auth;
 
 [QueryType]
-public static partial class AuthQueries
+public partial class AuthQueries
 {
+    // [AllowAnonymous]
     public static async Task<RegisterInfo> GetRegisterInfoAsync([Service] PGContext db)
         => new(
           CanRegisterAsAdmin: await CanAdminRegister(db)
          );
+
 }
 
 public static partial class AuthQueriesUtils
@@ -31,6 +33,8 @@ public static partial class AuthQueriesUtils
     [Mapper]
     public static partial class UserMapper
     {
+        public static partial IQueryable<User> ProjectToDto(IQueryable<UserEF> q);
+
         [MapperIgnoreSource(nameof(UserEF.PasswordHash))]
         public static partial User ToDto(UserEF o);
     }

@@ -35,6 +35,12 @@
           "TUnit.AspNetCore.Core": "1.65.68"
         }
       },
+      "ZeroQL": {
+        "type": "Direct",
+        "requested": "[8.0.0, )",
+        "resolved": "8.0.0",
+        "contentHash": "Q20YAhHH3SSMqeCh8RYBsMZ1sbfY695UWuIEkLrUFtruKGBB/3j25w6yraSH5uLVoTtpXwe70ADzYvu9LDl4mA=="
+      },
       "ChilliCream.Nitro.App": {
         "type": "Transitive",
         "resolved": "32.0.2",
@@ -207,6 +213,20 @@
         "contentHash": "yIQ89WAkH07D+WKj+uhr56k7AzFVvE2MGyxekYl836gwJ0OCFFNifvYdUvCZ9upBKmHWm4jUpujFVUVcnIeJrg==",
         "dependencies": {
           "HotChocolate.Types": "16.6.2"
+        }
+      },
+      "HotChocolate.Data": {
+        "type": "Transitive",
+        "resolved": "16.6.2",
+        "contentHash": "STlU+MGdNJy3w0G1J5eVRclQ0VIHgksRk/Zul1QDmBYCOT+sy+tOUn1/HJIqNWWmixEQu6L0GMQP7aZ6pXA9Bg==",
+        "dependencies": {
+          "GreenDonut.Data": "16.6.2",
+          "GreenDonut.Data.Abstractions": "16.6.2",
+          "GreenDonut.Data.Primitives": "16.6.2",
+          "HotChocolate.Execution.Operation.Abstractions": "16.6.2",
+          "HotChocolate.Execution.Projections": "16.6.2",
+          "HotChocolate.Types": "16.6.2",
+          "HotChocolate.Types.CursorPagination.Extensions": "16.6.2"
         }
       },
       "HotChocolate.Execution.Abstractions": {
@@ -852,6 +872,7 @@
           "HotChocolate.AspNetCore": "[16.6.2, )",
           "HotChocolate.AspNetCore.Authorization": "[16.6.2, )",
           "HotChocolate.AspNetCore.CommandLine": "[16.6.2, )",
+          "HotChocolate.Data": "[16.6.2, )",
           "Microsoft.AspNetCore.OpenApi": "[11.0.0-preview.7.26381.103, )",
           "NodaTime": "[3.3.3, )",
           "NodaTime.Serialization.SystemTextJson": "[1.4.0, )",

@@ -5,6 +5,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using Api.Auth;
 using Api.Auth.Endpoints;
 using Api.Auth.Handlers;
 using Api.Database;
@@ -23,6 +24,7 @@ using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 
+
 builder.Services.Configure<JsonOptions>(options =>
 {
     options.SerializerOptions.DefaultIgnoreCondition =
@@ -32,10 +34,10 @@ builder.Services.Configure<JsonOptions>(options =>
 });
 
 builder.Services.AddOpenApi();
-builder.Services.AddGraphQL()
-    .AddAuthorization()
-    .AddMutationConventions(applyToAllMutations: true)
-    .AddFairyBread(configureOptions: (opt) => opt.IncludeAttemptedValueInErrors = builder.Environment.IsDevelopment());
+builder.AddGraphQL()
+   .AddApiTypes()
+   .AddAuthorization()
+   .AddFairyBread(configureOptions: (opt) => opt.IncludeAttemptedValueInErrors = builder.Environment.IsDevelopment());
 
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterEndpoints.RegisterDTO>();
 builder.Services.AddFluentValidationAutoValidation();
@@ -55,7 +57,7 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() && app.Configuration["GRAPHQL_EXPORT"] != "1")
 {
     app.MapOpenApi();
     app.MapScalarApiReference();

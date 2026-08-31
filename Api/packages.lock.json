@@ -81,6 +81,21 @@
           "System.CommandLine": "2.0.5"
         }
       },
+      "HotChocolate.Data": {
+        "type": "Direct",
+        "requested": "[16.6.2, )",
+        "resolved": "16.6.2",
+        "contentHash": "STlU+MGdNJy3w0G1J5eVRclQ0VIHgksRk/Zul1QDmBYCOT+sy+tOUn1/HJIqNWWmixEQu6L0GMQP7aZ6pXA9Bg==",
+        "dependencies": {
+          "GreenDonut.Data": "16.6.2",
+          "GreenDonut.Data.Abstractions": "16.6.2",
+          "GreenDonut.Data.Primitives": "16.6.2",
+          "HotChocolate.Execution.Operation.Abstractions": "16.6.2",
+          "HotChocolate.Execution.Projections": "16.6.2",
+          "HotChocolate.Types": "16.6.2",
+          "HotChocolate.Types.CursorPagination.Extensions": "16.6.2"
+        }
+      },
       "HotChocolate.Types.Analyzers": {
         "type": "Direct",
         "requested": "[16.6.2, )",
