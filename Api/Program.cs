@@ -35,10 +35,9 @@ builder.Services.Configure<JsonOptions>(options =>
 
 builder.Services.AddHttpLogging(opt =>
 {
-    opt.CombineLogs = true;
-
     if (builder.Environment.IsDevelopment())
     {
+        opt.CombineLogs = true;
         opt.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
     }
 });

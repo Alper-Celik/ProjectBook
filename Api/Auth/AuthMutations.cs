@@ -1,20 +1,22 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
-using Microsoft.EntityFrameworkCore;
-
-using FluentValidation;
+using Api.Auth.Models;
+using Api.Auth.Utils;
+using Api.Database;
 
 using FairyBread;
 
-using Api.Database;
-using Api.Auth.Utils;
+using FluentValidation;
+
+using Geralt;
+
+using HotChocolate.Authorization;
+
+using Microsoft.EntityFrameworkCore;
 
 using static Api.Auth.AuthMutationsUtils;
-using System.Text;
-using Geralt;
-using Api.Auth.Models;
 using static Api.Auth.AuthQueriesUtils;
-using HotChocolate.Authorization;
 
 namespace Api.Auth;
 

@@ -1,23 +1,23 @@
-using static Api.Auth.Utils.LoginUtils;
-using static Api.Auth.Endpoints.RegisterEndpoints;
-
-using Api.Database;
 using Api.Auth.Models;
+using Api.Database;
+
+using HotChocolate.Authorization;
 
 using Riok.Mapperly.Abstractions;
 
-using HotChocolate.Authorization;
+using static Api.Auth.Endpoints.RegisterEndpoints;
+using static Api.Auth.Utils.LoginUtils;
 
 namespace Api.Auth;
 
 [QueryType]
 public partial class AuthQueries
 {
-    // [AllowAnonymous]
+    [AllowAnonymous]
     public static async Task<RegisterInfo> GetRegisterInfoAsync([Service] PGContext db)
-        => new(
-          CanRegisterAsAdmin: await CanAdminRegister(db)
-         );
+       => new(
+         CanRegisterAsAdmin: await CanAdminRegister(db)
+        );
 
 }
 

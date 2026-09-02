@@ -16,6 +16,8 @@ using Microsoft.Extensions.Configuration;
 using TUnit.AspNetCore;
 using TUnit.Core.Interfaces;
 
+using ZeroQL.Client;
+
 namespace Api.Tests;
 
 public class MyWebApplicationFactory : TestWebApplicationFactory<Program>
@@ -30,6 +32,21 @@ public class MyWebApplicationFactory : TestWebApplicationFactory<Program>
 
 public abstract class TestInit : WebApplicationTest<MyWebApplicationFactory, Program>
 {
+    public ApiClient Client
+    {
+        get
+        {
+            if (field is null)
+            {
+                var httpClient = Factory.CreateClient();
+                httpClient.BaseAddress = new Uri(httpClient.BaseAddress!.AbsoluteUri + "graphql/");
+                field = new ApiClient(httpClient);
+            }
+            return field;
+        }
+        set;
+    }
+
     protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
     {
         Stream strStream = new MemoryStream(
