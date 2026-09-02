@@ -33,6 +33,16 @@ builder.Services.Configure<JsonOptions>(options =>
         JsonNamingPolicy.CamelCase;
 });
 
+builder.Services.AddHttpLogging(opt =>
+{
+    opt.CombineLogs = true;
+
+    if (builder.Environment.IsDevelopment())
+    {
+        opt.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
+    }
+});
+
 builder.Services.AddOpenApi();
 builder.AddGraphQL()
    .AddApiTypes()
@@ -52,6 +62,8 @@ Api.Database.Setup.RegisterServices(builder.Services);
 Api.Auth.Setup.RegisterServices(builder.Services);
 
 var app = builder.Build();
+
+app.UseHttpLogging();
 
 // Configure the HTTP request pipeline.
 app.UseAuthentication();
