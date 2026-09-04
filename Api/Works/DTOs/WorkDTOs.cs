@@ -141,7 +141,11 @@ public record WorkGetDTO(
         AuthorGetDTO[] Authors,
 
         WorkIdentifierDTO[] WorkIdentifiers
-        ) : IEntityMetadata;
+        ) : IEntityMetadata
+{
+    public static byte IdPostfix => Work.IdPostfix;
+}
+
 
 [Mapper]
 public static partial class WorkGetDTOMapper

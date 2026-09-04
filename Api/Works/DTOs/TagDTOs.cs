@@ -34,7 +34,11 @@ public record TagGetDTO(
 
         string TagType,
         string TagName
-        ) : IEntityMetadata;
+        ) : IEntityMetadata
+{
+    public static byte IdPostfix => WorkTag.IdPostfix;
+}
+
 
 [Mapper]
 public static partial class TagGetDTOMapper

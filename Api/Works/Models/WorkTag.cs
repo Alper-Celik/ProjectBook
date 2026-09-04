@@ -13,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace Api.Works.Models;
 
 [Table("work_tags")]
-[Index(nameof(OwnerId), nameof(TagName), IsUnique = true)]
+[Index(nameof(OwnerId), nameof(TagType), nameof(TagName), IsUnique = true)]
 public class WorkTag : IEntityMetadata
 {
+    public static byte IdPostfix => (byte)IdPostfixes.WorkTag;
+
     [Key]
     public Guid Id { get; set; }
     public int RowVersion { get; set; }

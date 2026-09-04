@@ -15,6 +15,8 @@ namespace Api.Works.Models;
 [Table("works")]
 public class Work : IEntityMetadata
 {
+    public static byte IdPostfix => (byte)IdPostfixes.Work;
+
     [Key]
     public Guid Id { get; set; }
     public int RowVersion { get; set; }

@@ -43,10 +43,17 @@ builder.Services.AddHttpLogging(opt =>
 });
 
 builder.Services.AddOpenApi();
+builder.Services.AddSingleton<INodeIdSerializer, GuidNodeSerializer>();
 builder.AddGraphQL()
    .AddApiTypes()
    .AddAuthorization()
-   .AddFairyBread(configureOptions: (opt) => opt.IncludeAttemptedValueInErrors = builder.Environment.IsDevelopment());
+   .AddFairyBread(configureOptions: (opt) => opt.IncludeAttemptedValueInErrors = builder.Environment.IsDevelopment())
+    .AddGlobalObjectIdentification(opt =>
+    {
+        opt.RegisterNodeInterface = true;
+        opt.AddNodesField = true;
+        opt.EnsureAllNodesCanBeResolved = true;
+    });
 
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterEndpoints.RegisterDTO>();
 builder.Services.AddFluentValidationAutoValidation();

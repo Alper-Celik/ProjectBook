@@ -7,4 +7,5 @@ namespace Api;
 public static partial class ErrorCodes
 {
     public const string INVALID_CREDS = "INVALID_CREDS";
+    public const string INVALID_ID = "INVALID_ID";
 }

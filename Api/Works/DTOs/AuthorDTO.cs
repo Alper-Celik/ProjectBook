@@ -18,7 +18,11 @@ public record AuthorGetDTO(
         string? LastName,
         string DisplayName,
         string[] PenNames
-        ) : IEntityMetadata;
+        ) : IEntityMetadata
+{
+    public static byte IdPostfix => Models.Author.IdPostfix;
+}
+
 
 [Mapper]
 public static partial class AuthorGetDTOMapper
