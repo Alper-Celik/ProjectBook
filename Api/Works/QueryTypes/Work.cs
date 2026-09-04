@@ -6,7 +6,6 @@ using Riok.Mapperly.Abstractions;
 
 namespace Api.Works.QueryTypes;
 
-[Node]
 public class Work : IEntityMetadata
 {
     public static byte IdPostfix => Models.Work.IdPostfix;

@@ -36,11 +36,11 @@ builder.Services.Configure<JsonOptions>(options =>
         JsonNamingPolicy.CamelCase;
 });
 
+
 builder.Services.AddHttpLogging(opt =>
 {
     if (builder.Environment.IsDevelopment())
     {
-        opt.CombineLogs = true;
         opt.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
     }
 });
@@ -69,6 +69,11 @@ builder.AddGraphQL()
         opt.RegisterNodeInterface = true;
         opt.AddNodesField = true;
         opt.EnsureAllNodesCanBeResolved = true;
+    })
+    .ModifyServerOptions(opt =>
+    {
+        opt.Batching = HotChocolate.AspNetCore.AllowedBatching.All;
+
     });
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -84,6 +89,8 @@ Api.Database.Setup.RegisterServices(builder.Services);
 Api.Auth.Setup.RegisterServices(builder.Services);
 
 var app = builder.Build();
+
+app.UseWebSockets();
 
 app.UseHttpLogging();
 

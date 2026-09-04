@@ -8,4 +8,6 @@ public static partial class ErrorCodes
 {
     public const string INVALID_CREDS = "INVALID_CREDS";
     public const string INVALID_ID = "INVALID_ID";
+    public const string IDS_DOES_NOT_EXIST = "IDS_DOES_NOT_EXIST";
+    public const string IS_NOT_DISTINCT = "IS_NOT_DISTINCT";
 }
