@@ -4,7 +4,6 @@
 
 using System.Threading.Tasks;
 
-using Api.Auth.Endpoints;
 
 using ZeroQL;
 using ZeroQL.Client;

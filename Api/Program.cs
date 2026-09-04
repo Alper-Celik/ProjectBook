@@ -1,22 +1,25 @@
 // SPDX-FileCopyrightText: 2026 Alper Çelik <alper@alper-celik.dev>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
+global using static Api.Utils.GeneralUtils;
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using Api.Auth;
-using Api.Auth.Endpoints;
 using Api.Auth.Handlers;
 using Api.Database;
 
 using FluentValidation;
+
+using HotChocolate.Types.NodaTime;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+
+using NodaTime;
 
 using Scalar.AspNetCore;
 
@@ -45,9 +48,12 @@ builder.Services.AddHttpLogging(opt =>
 builder.Services.AddOpenApi();
 builder.Services.AddSingleton<INodeIdSerializer, GuidNodeSerializer>();
 builder.AddGraphQL()
-   .AddApiTypes()
-   .AddAuthorization()
-   .AddFairyBread(configureOptions: (opt) => opt.IncludeAttemptedValueInErrors = builder.Environment.IsDevelopment())
+    .AddApiTypes()
+    .AddAuthorization()
+    .AddNodaTime()
+    .AddTypeConverter<Instant, OffsetDateTime>(t => t.InUtc().ToOffsetDateTime())
+    .AddTypeConverter<OffsetDateTime, Instant>(t => t.ToInstant())
+    .AddFairyBread(configureOptions: (opt) => opt.IncludeAttemptedValueInErrors = builder.Environment.IsDevelopment())
     .AddGlobalObjectIdentification(opt =>
     {
         opt.RegisterNodeInterface = true;
@@ -55,7 +61,7 @@ builder.AddGraphQL()
         opt.EnsureAllNodesCanBeResolved = true;
     });
 
-builder.Services.AddValidatorsFromAssemblyContaining<RegisterEndpoints.RegisterDTO>();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddAuthentication()

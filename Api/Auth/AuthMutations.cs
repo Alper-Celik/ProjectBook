@@ -55,9 +55,13 @@ public static partial class AuthMutations
         Argon2id.ComputeHash(hash_chars, password_bytes, ARGON2ID_ITER, ARGON2ID_MEM_BYTES);
         string hash = new([.. hash_chars.Where(c => c != (char)byte.MinValue)]);
 
+        var now = Now();
         var user = new UserEF()
         {
-            Id = Guid.CreateVersion7(),
+            Id = Guid.CreateVersion7().WithPostfix(UserEF.IdPostfix),
+            MetadataAddedAt = now,
+            MetadataUpdatedAt = now,
+
             Email = input.Email,
             PasswordHash = hash,
             Admin = (await LoginUtils.CanAdminRegister(db)) && input.AdminRegistration

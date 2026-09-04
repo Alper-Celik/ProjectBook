@@ -5,3 +5,15 @@ public enum IdPostfixes : byte
     Author = 2,
     WorkTag = 3,
 }
+
+public static class GuidExtensions
+{
+    public static Guid WithPostfix(this Guid id, IdPostfixes postfix) => WithPostfix(id, (byte)postfix);
+    public static Guid WithPostfix(this Guid id, byte postfix)
+    {
+        Span<byte> newGuid = stackalloc byte[16];
+        id.TryWriteBytes(newGuid);
+        newGuid[15] = postfix;
+        return new Guid(newGuid);
+    }
+}

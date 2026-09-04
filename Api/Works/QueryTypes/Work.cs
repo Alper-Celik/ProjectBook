@@ -13,8 +13,8 @@ public class Work : IEntityMetadata
 
     public string? Description { get; set; }
 
-    public NodaTime.ZonedDateTime? WorkPublishedAt { get; set; }
-    public NodaTime.ZonedDateTime? WorkUpdatedAt { get; set; }
+    public NodaTime.Instant? WorkPublishedAt { get; set; }
+    public NodaTime.Instant? WorkUpdatedAt { get; set; }
     public List<WorkIdentifier> WorkIdentifiers { get; set; } = [];
 
     public record WorkIdentifier(

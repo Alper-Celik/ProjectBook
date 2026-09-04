@@ -12,12 +12,15 @@ namespace Api.Auth.Models;
 
 [Table("users")]
 [Index(nameof(Email), IsUnique = true)]
-public class UserEF
+public class UserEF : IEntityMetadata
 {
-    public const string UserHandleAcceptedRegex = @"^[a-zA-Z0-9_\-]{3,30}$";
+    public static byte IdPostfix => (byte)IdPostfixes.User;
 
     [Key]
     public Guid Id { get; set; }
+    public int RowVersion { get; set; }
+    public NodaTime.Instant MetadataAddedAt { get; set; }
+    public NodaTime.Instant MetadataUpdatedAt { get; set; }
 
     [EmailAddress]
     public required string Email { get; set; }
