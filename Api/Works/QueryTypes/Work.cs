@@ -2,8 +2,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+using Riok.Mapperly.Abstractions;
+
 namespace Api.Works.QueryTypes;
 
+[Node]
 public class Work : IEntityMetadata
 {
     public static byte IdPostfix => Models.Work.IdPostfix;
@@ -24,4 +27,10 @@ public class Work : IEntityMetadata
     public record WorkIdentifier(
             string WorkIdentifierType,
             string WorkIdentifierValue);
+}
+
+[Mapper]
+public static partial class WorkMapper
+{
+    public static partial IQueryable<Work> ToDto(this IQueryable<Models.Work> q);
 }

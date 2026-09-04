@@ -51,6 +51,15 @@ builder.AddGraphQL()
     .AddApiTypes()
     .AddAuthorization()
     .AddNodaTime()
+    .AddFiltering()
+    .AddSorting()
+    .AddPagingArguments()
+    .ModifyPagingOptions(opt =>
+    {
+        opt.MaxPageSize = 50;
+        opt.EnableRelativeCursors = true;
+        opt.RequirePagingBoundaries = true;
+    })
     .BindRuntimeType<Instant, HotChocolate.Types.NodaTime.DateTimeType>()
     .AddTypeConverter<Instant, OffsetDateTime>(t => t.InUtc().ToOffsetDateTime())
     .AddTypeConverter<OffsetDateTime, Instant>(t => t.ToInstant())
