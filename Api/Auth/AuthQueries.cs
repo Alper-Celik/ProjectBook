@@ -38,11 +38,12 @@ public static partial class AuthQueriesUtils
     public record User(
             Guid Id,
             int RowVersion,
-            NodaTime.OffsetDateTime MetadataAddedAt,
+            NodaTime.Instant MetadataAddedAt,
+            NodaTime.Instant MetadataUpdatedAt,
 
             string Email,
             bool EmailVerified,
-            bool Admin)
+            bool Admin) : IEntityMetadata
     {
         public static byte IdPostfix => UserEF.IdPostfix;
         public static async Task<User?> GetAsync([Service] PGContext db, Guid id, CancellationToken ct) => UserMapper.ToDto(await db.Users.FindAsync([id], cancellationToken: ct));

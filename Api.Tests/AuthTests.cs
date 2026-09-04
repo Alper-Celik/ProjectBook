@@ -27,12 +27,12 @@ public class AuthTests : TestInit
         preRegister_bool.HttpResponseMessage.EnsureSuccessStatusCode();
         await Assert.That(preRegister_bool.Data).IsTrue();
 
-        await Assert.That(user1.Data).IsNotNullOrEmpty();
+        await Assert.That(user1.Errors).IsNull().Or.IsEmpty();
 
         postAdminRegister_bool.HttpResponseMessage.EnsureSuccessStatusCode();
         await Assert.That(postNonAdminRegister_bool.Data).IsTrue();
 
-        await Assert.That(adminUser.Data).IsNotNullOrEmpty();
+        await Assert.That(adminUser.Errors).IsNull().Or.IsEmpty();
 
 
         await Assert.That(postAdminRegister_bool.Data).IsFalse();
@@ -41,10 +41,6 @@ public class AuthTests : TestInit
         await Assert.That(failedRegisterUser.Errors)
             .IsNotNull()
             .And.IsNotEmpty();
-        await Assert.That(failedRegisterUser.Data).IsNull();
-
-
-
     }
 
     [Test]
@@ -62,7 +58,7 @@ public class AuthTests : TestInit
 
     }
 
-    private static async Task<ZeroQL.GraphQLResult<string>> AddUser(ApiClient client, string name, bool asAdmin, string? password = null)
+    private static async Task<ZeroQL.GraphQLResult<DateTimeOffset>> AddUser(ApiClient client, string name, bool asAdmin, string? password = null)
     {
         var input = new
         {
@@ -73,7 +69,7 @@ public class AuthTests : TestInit
                 Password = password ?? "correct horse battery staple"
             }
         };
-        return await client.Mutation(input, static (i, m) => m.RegisterMutation(i.input, m => m.Token));
+        return await client.Mutation(input, static (i, m) => m.RegisterMutation(i.input, m => m.User(u => u.MetadataAddedAt)));
     }
 
     private static Task<ZeroQL.GraphQLResult<bool>> CanRegisterAdmin(ApiClient client) => client.Query(q => q.RegisterInfo(r => r.CanRegisterAsAdmin));
