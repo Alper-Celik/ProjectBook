@@ -5,6 +5,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Api.Auth.Models;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,7 +15,7 @@ using Riok.Mapperly.Abstractions;
 namespace Api.Works.Models;
 
 [Table("works")]
-public class Work : IEntityMetadata
+public class Work : IDbEntityMetadata
 {
     public static byte IdPostfix => (byte)IdPostfixes.Work;
 
@@ -22,9 +24,8 @@ public class Work : IEntityMetadata
     public int RowVersion { get; set; }
     public NodaTime.Instant MetadataAddedAt { get; set; }
     public NodaTime.Instant MetadataUpdatedAt { get; set; }
-
-
     [MapperIgnore]
+    [ForeignKey(nameof(UserEF))]
     public Guid OwnerId { get; set; }
 
     public required string Title { get; set; }

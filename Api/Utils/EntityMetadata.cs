@@ -5,12 +5,19 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 
-public interface IEntityMetadata
+public interface IDbEntityMetadata : IEntityMetadata
+{
+    public Guid OwnerId { get; }
+}
+public interface IEntityMetadata : IBasicEntityMetadata
+{
+    public NodaTime.Instant MetadataAddedAt { get; }
+    public NodaTime.Instant MetadataUpdatedAt { get; }
+}
+public interface IBasicEntityMetadata
 {
     [NotMapped]
     public static abstract byte IdPostfix { get; }
     public Guid Id { get; }
     public int RowVersion { get; }
-    public NodaTime.Instant MetadataAddedAt { get; }
-    public NodaTime.Instant MetadataUpdatedAt { get; }
 }

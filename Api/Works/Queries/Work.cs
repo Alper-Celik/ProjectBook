@@ -2,10 +2,35 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+using Api.Database;
+
+using GreenDonut.Data;
+
+using HotChocolate.Types.Pagination;
+
 using Riok.Mapperly.Abstractions;
 
-namespace Api.Works.QueryTypes;
+namespace Api.Works.Queries;
 
+[QueryType]
+public static partial class WorkQuery
+{
+
+    [UseFiltering]
+    [UseSorting]
+    public static async Task<PageConnection<Work>> GetWorks(
+            [Service] PGContext db,
+            CancellationToken ct,
+            QueryContext<Work> qc,
+            PagingArguments pagingArguments
+            )
+    {
+        return await db.Works.ProjectToDto().With(qc).ToPageAsync(pagingArguments, cancellationToken: ct);
+    }
+
+}
+
+[Node]
 public class Work : IEntityMetadata
 {
     public static byte IdPostfix => Models.Work.IdPostfix;
@@ -26,12 +51,14 @@ public class Work : IEntityMetadata
     public record WorkIdentifier(
             string WorkIdentifierType,
             string WorkIdentifierValue);
+
+    public static async Task<Work?> GetAsync([Service] PGContext db, Guid id, CancellationToken ct) => WorkMapper.ToDto(await db.Works.FindAsync([id], cancellationToken: ct));
 }
 
 [Mapper]
 public static partial class WorkMapper
 {
-    public static partial Work ToDto(Models.Work w);
+    public static partial Work? ToDto(Models.Work? w);
 
     public static partial IQueryable<Work> ProjectToDto(this IQueryable<Models.Work> q);
 }

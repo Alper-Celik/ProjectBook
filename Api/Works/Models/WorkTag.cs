@@ -10,11 +10,13 @@ using Api.Auth.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using Riok.Mapperly.Abstractions;
+
 namespace Api.Works.Models;
 
 [Table("work_tags")]
 [Index(nameof(OwnerId), nameof(TagNamespace), nameof(TagName), IsUnique = true)]
-public class WorkTag : IEntityMetadata
+public class WorkTag : IDbEntityMetadata
 {
     public static byte IdPostfix => (byte)IdPostfixes.WorkTag;
 
@@ -23,7 +25,8 @@ public class WorkTag : IEntityMetadata
     public int RowVersion { get; set; }
     public NodaTime.Instant MetadataAddedAt { get; set; }
     public NodaTime.Instant MetadataUpdatedAt { get; set; }
-
+    [MapperIgnore]
+    [ForeignKey(nameof(UserEF))]
     public Guid OwnerId { get; set; }
 
     public required string[] TagNamespace { get; set; }
