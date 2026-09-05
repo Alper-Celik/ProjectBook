@@ -28,7 +28,7 @@ public static partial class WorkQueries
             PagingArguments pagingArguments
             )
     {
-        return await db.Works.ToDto().With(qc).ToPageAsync(pagingArguments, cancellationToken: ct);
+        return await db.Works.ProjectToDto().With(qc).ToPageAsync(pagingArguments, cancellationToken: ct);
     }
 
 }

@@ -42,6 +42,16 @@ public class WorkTag : IEntityMetadata
 [PrimaryKey(nameof(WorkId), nameof(WorkTagId))]
 public class WorkTag_Work
 {
+
+    public WorkTag_Work(Guid workId, Guid tagId)
+    {
+        WorkId = workId;
+        WorkTagId = tagId;
+    }
+    public WorkTag_Work()
+    {
+    }
+
     public Guid WorkId { get; set; }
     public Guid WorkTagId { get; set; }
 

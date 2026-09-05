@@ -40,6 +40,15 @@ public class Author : IEntityMetadata
 [PrimaryKey(nameof(WorkId), nameof(AuthorId))]
 public class Work_Author
 {
+    public Work_Author(Guid workId, Guid authorId)
+    {
+        WorkId = workId;
+        AuthorId = authorId;
+    }
+    public Work_Author()
+    {
+    }
+
     public Guid WorkId { get; set; }
     public Guid AuthorId { get; set; }
 

@@ -36,7 +36,9 @@ public class Work : IEntityMetadata
     public List<WorkIdentifier> WorkIdentifiers { get; set; } = [];
 
     // Navigation Properties
+    [MapperIgnore]
     public List<WorkTag> WorkTags { get; set; } = [];
+    [MapperIgnore]
     public List<Author> Authors { get; set; } = [];
 
     [MapperIgnore]

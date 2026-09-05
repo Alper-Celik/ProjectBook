@@ -31,5 +31,7 @@ public class Work : IEntityMetadata
 [Mapper]
 public static partial class WorkMapper
 {
-    public static partial IQueryable<Work> ToDto(this IQueryable<Models.Work> q);
+    public static partial Work ToDto(Models.Work w);
+
+    public static partial IQueryable<Work> ProjectToDto(this IQueryable<Models.Work> q);
 }
